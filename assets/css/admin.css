@@ -1,0 +1,939 @@
+/**
+ * Mail SMTP by Oi - Admin Stylesheet
+ * Brand: Oi Technologies
+ */
+
+:root {
+    --oi-primary: #4f46e5;
+    --oi-primary-hover: #4338ca;
+    --oi-primary-light: #eef2ff;
+    --oi-success: #10b981;
+    --oi-success-light: #ecfdf5;
+    --oi-danger: #ef4444;
+    --oi-danger-light: #fef2f2;
+    --oi-warning: #f59e0b;
+    --oi-warning-light: #fffbeb;
+    --oi-dark: #0f172a;
+    --oi-gray-50: #f8fafc;
+    --oi-gray-100: #f1f5f9;
+    --oi-gray-200: #e2e8f0;
+    --oi-gray-300: #cbd5e1;
+    --oi-gray-400: #94a3b8;
+    --oi-gray-600: #475569;
+    --oi-gray-700: #334155;
+    --oi-radius: 12px;
+    --oi-radius-sm: 8px;
+    --oi-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --oi-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --oi-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+}
+
+.oi-smtp-wrap {
+    max-width: 1180px;
+    margin: 20px 20px 40px 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    color: var(--oi-gray-700);
+}
+
+/* Header Banner */
+.oi-header-card {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%);
+    color: #ffffff;
+    padding: 24px 30px;
+    border-radius: var(--oi-radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--oi-shadow);
+    margin-bottom: 24px;
+}
+
+.oi-header-brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.oi-brand-icon {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    width: 56px;
+    height: 56px;
+    border-radius: var(--oi-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    backdrop-filter: blur(4px);
+}
+
+.oi-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff !important;
+    line-height: 1.2;
+}
+
+.oi-subtitle {
+    margin: 4px 0 0 0;
+    font-size: 14px;
+    color: #c7d2fe;
+}
+
+.oi-version-pill {
+    background: rgba(255, 255, 255, 0.2);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    margin-left: 6px;
+}
+
+/* Status Pill */
+.oi-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+}
+
+.oi-status-active {
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.oi-status-inactive {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.oi-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    background-color: currentColor;
+    box-shadow: 0 0 8px currentColor;
+}
+
+/* Stats Cards Grid */
+.oi-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.oi-stat-card {
+    background: #ffffff;
+    border-radius: var(--oi-radius);
+    padding: 20px;
+    border: 1px solid var(--oi-gray-200);
+    box-shadow: var(--oi-shadow-sm);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.oi-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--oi-shadow);
+}
+
+.oi-stat-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--oi-gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.oi-stat-value {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin: 8px 0 4px 0;
+}
+
+.oi-stat-hint {
+    font-size: 12px;
+    color: var(--oi-gray-400);
+}
+
+.oi-text-success { color: var(--oi-success); }
+.oi-text-danger  { color: var(--oi-danger); }
+.oi-text-primary { color: var(--oi-primary); }
+.oi-text-mailer  { color: #6366f1; font-size: 24px; }
+
+/* Navigation Tabs */
+.oi-nav-tabs {
+    border-bottom: 2px solid var(--oi-gray-200);
+    margin-bottom: 20px;
+}
+
+.oi-nav-tabs .nav-tab {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: var(--oi-gray-600);
+    margin-right: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.oi-nav-tabs .nav-tab:hover {
+    background: var(--oi-gray-100);
+    color: var(--oi-primary);
+}
+
+.oi-nav-tabs .nav-tab-active,
+.oi-nav-tabs .nav-tab-active:hover {
+    background: #ffffff;
+    color: var(--oi-primary) !important;
+    border-bottom: 3px solid var(--oi-primary) !important;
+    box-shadow: none;
+}
+
+.oi-tab-badge {
+    background: var(--oi-danger);
+    color: #ffffff;
+    font-size: 11px;
+    padding: 1px 7px;
+    border-radius: 10px;
+    margin-left: 4px;
+}
+
+/* Card Container */
+.oi-card {
+    background: #ffffff;
+    border-radius: var(--oi-radius);
+    padding: 30px;
+    border: 1px solid var(--oi-gray-200);
+    box-shadow: var(--oi-shadow-sm);
+}
+
+.oi-card-header {
+    border-bottom: 1px solid var(--oi-gray-200);
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+}
+
+.oi-card-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--oi-dark);
+}
+
+.oi-card-header p {
+    margin: 6px 0 0 0;
+    color: var(--oi-gray-600);
+    font-size: 14px;
+}
+
+/* Section Title */
+.oi-section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--oi-dark);
+    margin: 28px 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--oi-gray-100);
+}
+
+/* Form Elements */
+.oi-form-group {
+    margin-bottom: 20px;
+}
+
+.oi-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--oi-gray-700);
+    margin-bottom: 6px;
+}
+
+.oi-required {
+    color: var(--oi-danger);
+}
+
+.oi-input,
+.oi-select,
+.oi-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--oi-gray-300);
+    border-radius: var(--oi-radius-sm);
+    font-size: 14px;
+    color: var(--oi-dark);
+    background: #ffffff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+}
+
+.oi-input:focus,
+.oi-select:focus,
+.oi-textarea:focus {
+    border-color: var(--oi-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.oi-help {
+    display: block;
+    font-size: 12px;
+    color: var(--oi-gray-400);
+    margin-top: 5px;
+    line-height: 1.4;
+}
+
+.oi-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--oi-gray-700);
+    margin-top: 8px;
+    cursor: pointer;
+}
+
+.oi-radio-group {
+    display: flex;
+    gap: 16px;
+    padding-top: 6px;
+}
+
+.oi-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.oi-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+}
+
+/* Master Toggle Switch */
+.oi-toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--oi-primary-light);
+    padding: 16px 20px;
+    border-radius: var(--oi-radius-sm);
+    border: 1px solid rgba(79, 70, 229, 0.15);
+}
+
+.oi-toggle-text .oi-label {
+    margin-bottom: 2px;
+    font-size: 15px;
+    color: var(--oi-primary);
+}
+
+.oi-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.oi-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.oi-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--oi-gray-300);
+    transition: 0.3s;
+    border-radius: 28px;
+}
+
+.oi-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input:checked + .oi-slider {
+    background-color: var(--oi-primary);
+}
+
+input:checked + .oi-slider:before {
+    transform: translateX(22px);
+}
+
+/* Mailer Selection Cards */
+.oi-mailers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.oi-mailer-card {
+    border: 2px solid var(--oi-gray-200);
+    border-radius: var(--oi-radius);
+    padding: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    cursor: pointer;
+    background: #ffffff;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.oi-mailer-card:hover {
+    border-color: var(--oi-gray-400);
+    transform: translateY(-1px);
+    box-shadow: var(--oi-shadow-sm);
+}
+
+.oi-mailer-selected {
+    border-color: var(--oi-primary) !important;
+    background: var(--oi-primary-light);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+.oi-mailer-radio {
+    position: absolute;
+    opacity: 0;
+}
+
+.oi-mailer-icon {
+    width: 40px;
+    height: 40px;
+    background: #ffffff;
+    border-radius: var(--oi-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--oi-gray-200);
+    color: var(--oi-primary);
+    flex-shrink: 0;
+}
+
+.oi-mailer-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--oi-dark);
+}
+
+.oi-mailer-desc {
+    font-size: 12px;
+    color: var(--oi-gray-600);
+    margin-top: 4px;
+    line-height: 1.3;
+}
+
+/* Action Button & Status */
+.oi-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--oi-gray-200);
+}
+
+.oi-btn {
+    background: var(--oi-primary) !important;
+    border-color: var(--oi-primary) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    border-radius: var(--oi-radius-sm) !important;
+    box-shadow: var(--oi-shadow-sm) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 0 20px !important;
+}
+
+.oi-btn:hover {
+    background: var(--oi-primary-hover) !important;
+    border-color: var(--oi-primary-hover) !important;
+}
+
+.oi-btn-sm {
+    padding: 2px 10px !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+    height: auto !important;
+    line-height: 2 !important;
+}
+
+.oi-btn-xs {
+    padding: 1px 8px !important;
+    font-size: 11px !important;
+    height: auto !important;
+    line-height: 1.8 !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.oi-btn-xs:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+    color: #ffffff !important;
+}
+
+.oi-btn-danger {
+    color: var(--oi-danger) !important;
+    border-color: var(--oi-gray-300) !important;
+}
+
+.oi-btn-danger:hover {
+    background: var(--oi-danger-light) !important;
+    border-color: var(--oi-danger) !important;
+}
+
+.oi-btn-delete {
+    color: var(--oi-danger) !important;
+    font-weight: bold !important;
+}
+
+.oi-save-status {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Toolbar & Filter Pills */
+.oi-toolbar-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.oi-flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.oi-filter-group {
+    display: flex;
+    gap: 6px;
+}
+
+.oi-pill-btn {
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: var(--oi-gray-100);
+    color: var(--oi-gray-700);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.15s;
+}
+
+.oi-pill-btn:hover {
+    background: var(--oi-gray-200);
+    color: var(--oi-dark);
+}
+
+.oi-pill-btn.active {
+    background: var(--oi-primary);
+    color: #ffffff;
+}
+
+.oi-search-group {
+    display: flex;
+    gap: 8px;
+}
+
+.oi-input-sm {
+    padding: 4px 10px;
+    font-size: 13px;
+    border: 1px solid var(--oi-gray-300);
+    border-radius: var(--oi-radius-sm);
+    min-width: 220px;
+}
+
+/* Table Styles */
+.oi-table {
+    border: 1px solid var(--oi-gray-200) !important;
+    border-radius: var(--oi-radius-sm);
+    overflow: hidden;
+}
+
+.oi-table th {
+    font-weight: 600;
+    background: var(--oi-gray-50);
+}
+
+.oi-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.oi-badge-sent {
+    background: var(--oi-success-light);
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.oi-badge-failed {
+    background: var(--oi-danger-light);
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    cursor: help;
+}
+
+.oi-table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+}
+
+.oi-empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--oi-gray-400);
+}
+
+.oi-empty-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+    color: var(--oi-gray-300);
+}
+
+/* Terminal / Handshake Debugger Window */
+.oi-terminal-card {
+    background: #0f172a;
+    border-radius: var(--oi-radius);
+    overflow: hidden;
+    box-shadow: var(--oi-shadow-lg);
+    border: 1px solid #1e293b;
+    margin-top: 16px;
+}
+
+.oi-terminal-header {
+    background: #1e293b;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.oi-terminal-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+}
+
+.oi-dot-red    { background: #ef4444; }
+.oi-dot-yellow { background: #f59e0b; }
+.oi-dot-green  { background: #10b981; }
+
+.oi-terminal-title {
+    color: #94a3b8;
+    font-size: 12px;
+    font-family: monospace;
+    font-weight: 600;
+    margin-left: 8px;
+    flex-grow: 1;
+}
+
+.oi-terminal-body {
+    padding: 18px;
+    margin: 0;
+    color: #38bdf8;
+    background: #0f172a;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    max-height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+/* Alerts */
+.oi-alert {
+    padding: 14px 18px;
+    border-radius: var(--oi-radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.oi-alert-success {
+    background: var(--oi-success-light);
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+}
+
+.oi-alert-danger {
+    background: var(--oi-danger-light);
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+/* Port Diagnostics */
+.oi-port-tester-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.oi-port-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.oi-port-card {
+    background: var(--oi-gray-50);
+    border: 1px solid var(--oi-gray-200);
+    border-radius: var(--oi-radius-sm);
+    padding: 16px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.oi-port-number {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--oi-dark);
+}
+
+.oi-port-name {
+    font-size: 12px;
+    color: var(--oi-gray-600);
+    margin: 4px 0 12px 0;
+}
+
+.oi-badge-idle {
+    background: var(--oi-gray-200);
+    color: var(--oi-gray-700);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.oi-badge-open {
+    background: var(--oi-success-light);
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.oi-badge-closed {
+    background: var(--oi-danger-light);
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* DNS Cards */
+.oi-dns-card {
+    background: var(--oi-gray-50);
+    border: 1px solid var(--oi-gray-200);
+    border-radius: var(--oi-radius);
+    padding: 20px;
+}
+
+.oi-dns-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.oi-dns-badge {
+    width: 60px;
+    height: 40px;
+    border-radius: var(--oi-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.oi-dns-pass {
+    background: var(--oi-success-light);
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.oi-dns-warn {
+    background: var(--oi-warning-light);
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+.oi-dns-val {
+    background: #ffffff;
+    border: 1px solid var(--oi-gray-300);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 12px;
+    margin: 6px 0;
+    word-break: break-all;
+}
+
+/* Environment Table */
+.oi-env-table {
+    border-radius: var(--oi-radius-sm);
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+/* Modal Popup */
+.oi-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.oi-modal-container {
+    background: #ffffff;
+    border-radius: var(--oi-radius);
+    width: 90%;
+    max-width: 750px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.oi-modal-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--oi-gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--oi-gray-50);
+}
+
+.oi-modal-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--oi-dark);
+}
+
+.oi-modal-close {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    color: var(--oi-gray-400);
+    cursor: pointer;
+    line-height: 1;
+}
+
+.oi-modal-close:hover {
+    color: var(--oi-danger);
+}
+
+.oi-modal-body {
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.oi-modal-meta {
+    background: var(--oi-gray-50);
+    border: 1px solid var(--oi-gray-200);
+    border-radius: var(--oi-radius-sm);
+    padding: 14px;
+    font-size: 13px;
+    margin-bottom: 18px;
+    line-height: 1.6;
+}
+
+.oi-modal-body-preview {
+    background: #ffffff;
+    border: 1px solid var(--oi-gray-300);
+    border-radius: var(--oi-radius-sm);
+    padding: 16px;
+    min-height: 100px;
+    max-height: 250px;
+    overflow-y: auto;
+    font-size: 13px;
+}
+
+/* About Box */
+.oi-about-box {
+    background: var(--oi-gray-50);
+    border: 1px solid var(--oi-gray-200);
+    border-radius: var(--oi-radius);
+    padding: 24px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.oi-about-links {
+    margin-top: 16px;
+    display: flex;
+    gap: 12px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 782px) {
+    .oi-grid-2,
+    .oi-grid-3 {
+        grid-template-columns: 1fr;
+    }
+    .oi-header-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+}
