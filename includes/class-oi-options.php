@@ -178,39 +178,46 @@ class OI_Options {
         $cleaned['smtp_user']       = !empty($raw_data['smtp_user']) ? sanitize_text_field($raw_data['smtp_user']) : '';
         $cleaned['smtp_timeout']    = !empty($raw_data['smtp_timeout']) ? max(5, min(120, absint($raw_data['smtp_timeout']))) : 20;
 
-        // Password handling: if left blank, keep existing encrypted password
-        if (isset($raw_data['smtp_pass']) && $raw_data['smtp_pass'] !== '') {
-            $cleaned['smtp_pass'] = OI_Encryption::encrypt($raw_data['smtp_pass']);
+        $raw_current = get_option(self::OPTION_KEY, []);
+        if (!is_array($raw_current)) {
+            $raw_current = [];
+        }
+
+        // Password handling: if left blank or equal to masked asterisks/dots, preserve existing encrypted string
+        $masked_placeholders = ['********', '••••••••', '******', '••••••'];
+
+        if (isset($raw_data['smtp_pass']) && trim($raw_data['smtp_pass']) !== '' && !in_array(trim($raw_data['smtp_pass']), $masked_placeholders, true)) {
+            $cleaned['smtp_pass'] = OI_Encryption::encrypt(trim($raw_data['smtp_pass']));
         } else {
-            $cleaned['smtp_pass'] = !empty($current['smtp_pass']) ? OI_Encryption::encrypt($current['smtp_pass']) : '';
+            $cleaned['smtp_pass'] = !empty($raw_current['smtp_pass']) ? $raw_current['smtp_pass'] : '';
         }
 
         // API Key handling
-        if (isset($raw_data['api_key']) && $raw_data['api_key'] !== '') {
+        if (isset($raw_data['api_key']) && trim($raw_data['api_key']) !== '' && !in_array(trim($raw_data['api_key']), $masked_placeholders, true)) {
             $cleaned['api_key'] = OI_Encryption::encrypt(trim($raw_data['api_key']));
         } else {
-            $cleaned['api_key'] = !empty($current['api_key']) ? OI_Encryption::encrypt($current['api_key']) : '';
+            $cleaned['api_key'] = !empty($raw_current['api_key']) ? $raw_current['api_key'] : '';
         }
 
         // Mailgun specifics
-        if (isset($raw_data['mailgun_api_key']) && $raw_data['mailgun_api_key'] !== '') {
+        if (isset($raw_data['mailgun_api_key']) && trim($raw_data['mailgun_api_key']) !== '' && !in_array(trim($raw_data['mailgun_api_key']), $masked_placeholders, true)) {
             $cleaned['mailgun_api_key'] = OI_Encryption::encrypt(trim($raw_data['mailgun_api_key']));
         } else {
-            $cleaned['mailgun_api_key'] = !empty($current['mailgun_api_key']) ? OI_Encryption::encrypt($current['mailgun_api_key']) : '';
+            $cleaned['mailgun_api_key'] = !empty($raw_current['mailgun_api_key']) ? $raw_current['mailgun_api_key'] : '';
         }
         $cleaned['mailgun_domain'] = !empty($raw_data['mailgun_domain']) ? sanitize_text_field(trim($raw_data['mailgun_domain'])) : '';
         $cleaned['mailgun_region'] = ($raw_data['mailgun_region'] ?? 'us') === 'eu' ? 'eu' : 'us';
 
         // Amazon SES specifics
-        if (isset($raw_data['ses_access_key']) && $raw_data['ses_access_key'] !== '') {
+        if (isset($raw_data['ses_access_key']) && trim($raw_data['ses_access_key']) !== '' && !in_array(trim($raw_data['ses_access_key']), $masked_placeholders, true)) {
             $cleaned['ses_access_key'] = OI_Encryption::encrypt(trim($raw_data['ses_access_key']));
         } else {
-            $cleaned['ses_access_key'] = !empty($current['ses_access_key']) ? OI_Encryption::encrypt($current['ses_access_key']) : '';
+            $cleaned['ses_access_key'] = !empty($raw_current['ses_access_key']) ? $raw_current['ses_access_key'] : '';
         }
-        if (isset($raw_data['ses_secret_key']) && $raw_data['ses_secret_key'] !== '') {
+        if (isset($raw_data['ses_secret_key']) && trim($raw_data['ses_secret_key']) !== '' && !in_array(trim($raw_data['ses_secret_key']), $masked_placeholders, true)) {
             $cleaned['ses_secret_key'] = OI_Encryption::encrypt(trim($raw_data['ses_secret_key']));
         } else {
-            $cleaned['ses_secret_key'] = !empty($current['ses_secret_key']) ? OI_Encryption::encrypt($current['ses_secret_key']) : '';
+            $cleaned['ses_secret_key'] = !empty($raw_current['ses_secret_key']) ? $raw_current['ses_secret_key'] : '';
         }
         $cleaned['ses_region'] = !empty($raw_data['ses_region']) ? sanitize_text_field(trim($raw_data['ses_region'])) : 'us-east-1';
 
@@ -222,10 +229,10 @@ class OI_Options {
             $cleaned['alert_channels'] = ['email'];
         }
 
-        if (isset($raw_data['telegram_bot_token']) && $raw_data['telegram_bot_token'] !== '') {
+        if (isset($raw_data['telegram_bot_token']) && trim($raw_data['telegram_bot_token']) !== '' && !in_array(trim($raw_data['telegram_bot_token']), $masked_placeholders, true)) {
             $cleaned['telegram_bot_token'] = OI_Encryption::encrypt(trim($raw_data['telegram_bot_token']));
         } else {
-            $cleaned['telegram_bot_token'] = !empty($current['telegram_bot_token']) ? OI_Encryption::encrypt($current['telegram_bot_token']) : '';
+            $cleaned['telegram_bot_token'] = !empty($raw_current['telegram_bot_token']) ? $raw_current['telegram_bot_token'] : '';
         }
         $cleaned['telegram_chat_id']    = !empty($raw_data['telegram_chat_id']) ? sanitize_text_field(trim($raw_data['telegram_chat_id'])) : '';
         $cleaned['slack_webhook_url']   = !empty($raw_data['slack_webhook_url']) ? esc_url_raw(trim($raw_data['slack_webhook_url'])) : '';
@@ -268,6 +275,7 @@ class OI_Options {
         }
 
         self::$settings = null; // flush cache
-        return update_option(self::OPTION_KEY, $cleaned);
+        $updated = update_option(self::OPTION_KEY, $cleaned);
+        return ($updated !== false || get_option(self::OPTION_KEY) == $cleaned);
     }
 }

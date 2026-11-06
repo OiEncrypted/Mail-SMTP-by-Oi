@@ -196,8 +196,8 @@ class OI_Queue {
                 $error_msg = __('Failed to send from background queue.', 'mail-smtp-by-oi');
 
                 if ($attempts < 3) {
-                    // Retry with exponential delay (2 min, 4 min)
-                    $next_retry = date('Y-m-d H:i:s', time() + ($attempts * 120));
+                    // Retry with exponential delay (2 min, 4 min) in local site timezone
+                    $next_retry = date_i18n('Y-m-d H:i:s', current_time('timestamp') + ($attempts * 120));
                     $wpdb->update($table, [
                         'status'       => 'pending',
                         'scheduled_at' => $next_retry,

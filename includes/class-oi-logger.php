@@ -439,6 +439,7 @@ class OI_Logger {
     public static function clear_all() {
         global $wpdb;
         $table = self::get_table_name();
+        OI_Attachments::clear_vault();
         return (bool)$wpdb->query("TRUNCATE TABLE $table");
     }
 
@@ -455,6 +456,14 @@ class OI_Logger {
         $table = self::get_table_name();
         $date_threshold = gmdate('Y-m-d H:i:s', time() - ($retention_days * DAY_IN_SECONDS));
 
-        $wpdb->query($wpdb->prepare("DELETE FROM $table WHERE created_at < %s", $date_threshold));
+        // Delete associated archived attachment files first to prevent disk leakage
+        $old_ids = $wpdb->get_col($wpdb->prepare("SELECT id FROM $table WHERE created_at < %s LIMIT 1000", $date_threshold));
+        if (!empty($old_ids)) {
+            foreach ($old_ids as $old_id) {
+                OI_Attachments::delete_log_attachments($old_id);
+            }
+            $placeholders = implode(',', array_fill(0, count($old_ids), '%d'));
+            $wpdb->query($wpdb->prepare("DELETE FROM $table WHERE id IN ($placeholders)", $old_ids));
+        }
     }
 }

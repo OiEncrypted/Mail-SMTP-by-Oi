@@ -623,8 +623,8 @@
             var rowHtml = '<tr class="oi-route-rule-row">' +
                 '<td><select class="oi-select" name="routing_rules[' + nextRuleIndex + '][field]">' +
                 '<option value="subject">Subject</option>' +
-                '<option value="to">To Email</option>' +
-                '<option value="from">From Email</option>' +
+                '<option value="to_email">To Email</option>' +
+                '<option value="from_email">From Email</option>' +
                 '<option value="headers">Headers</option>' +
                 '</select></td>' +
                 '<td><select class="oi-select" name="routing_rules[' + nextRuleIndex + '][operator]">' +

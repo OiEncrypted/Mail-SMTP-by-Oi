@@ -64,9 +64,11 @@ class OI_Routing {
             case 'subject':
                 $target_val = $subject;
                 break;
+            case 'from':
             case 'from_email':
                 $target_val = $from;
                 break;
+            case 'to':
             case 'to_email':
                 $target_val = $to;
                 break;

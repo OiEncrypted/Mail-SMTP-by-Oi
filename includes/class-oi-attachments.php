@@ -123,6 +123,33 @@ class OI_Attachments {
     }
 
     /**
+     * Clear all attachment files stored in the vault
+     */
+    public static function clear_vault() {
+        $vault = self::get_vault_dir();
+        if (!is_dir($vault)) {
+            return;
+        }
+
+        $items = scandir($vault);
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..' || $item === '.htaccess' || $item === 'index.php') {
+                continue;
+            }
+            $target = trailingslashit($vault) . $item;
+            if (is_dir($target)) {
+                $subfiles = scandir($target);
+                foreach ($subfiles as $sf) {
+                    if ($sf !== '.' && $sf !== '..') {
+                        @unlink(trailingslashit($target) . $sf);
+                    }
+                }
+                @rmdir($target);
+            }
+        }
+    }
+
+    /**
      * Handle attachment download request
      */
     public static function handle_download() {

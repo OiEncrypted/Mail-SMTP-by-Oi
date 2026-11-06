@@ -57,11 +57,12 @@ class OI_Encryption {
 
         if (function_exists('openssl_encrypt')) {
             $iv_length = openssl_cipher_iv_length(self::$cipher);
-            $iv = openssl_random_pseudo_bytes($iv_length);
-            $encrypted = openssl_encrypt($value, self::$cipher, self::get_key(), 0, $iv);
+            $iv = function_exists('random_bytes') ? random_bytes($iv_length) : openssl_random_pseudo_bytes($iv_length);
+            $encrypted = openssl_encrypt($value, self::$cipher, self::get_key(), OPENSSL_RAW_DATA, $iv);
 
             if ($encrypted !== false) {
-                return self::$prefix . base64_encode($iv . '::' . $encrypted);
+                // v2 format: Store IV directly prefixed to ciphertext in base64 (immune to delimiter splitting)
+                return self::$prefix . 'v2::' . base64_encode($iv . $encrypted);
             }
         }
 
@@ -91,6 +92,23 @@ class OI_Encryption {
             return str_rot13(base64_decode(substr($raw, 5)));
         }
 
+        // Modern v2 format
+        if (strpos($raw, 'v2::') === 0) {
+            if (function_exists('openssl_decrypt')) {
+                $decoded = base64_decode(substr($raw, 4));
+                $iv_length = openssl_cipher_iv_length(self::$cipher);
+                if (strlen($decoded) > $iv_length) {
+                    $iv = substr($decoded, 0, $iv_length);
+                    $cipher_text = substr($decoded, $iv_length);
+                    $decrypted = openssl_decrypt($cipher_text, self::$cipher, self::get_key(), OPENSSL_RAW_DATA, $iv);
+                    if ($decrypted !== false) {
+                        return $decrypted;
+                    }
+                }
+            }
+        }
+
+        // Legacy v1 format compatibility (backward compatibility)
         if (function_exists('openssl_decrypt')) {
             $decoded = base64_decode($raw);
             $parts = explode('::', $decoded, 2);

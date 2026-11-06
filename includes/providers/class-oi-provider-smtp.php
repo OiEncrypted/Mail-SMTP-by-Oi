@@ -63,12 +63,27 @@ class OI_Provider_SMTP implements OI_Provider_Interface {
 
             // Mailer configuration
             $phpmailer->isSMTP();
-            $phpmailer->Host = $settings['smtp_host'] ?? '';
-            $phpmailer->Port = (int)($settings['smtp_port'] ?? 587);
+
+            $host = $settings['smtp_host'] ?? '';
+            $port = (int)($settings['smtp_port'] ?? 587);
+            $encryption = $settings['smtp_encryption'] ?? 'tls';
+
+            // Automatic presets for Gmail and Outlook
+            if ($this->id === 'gmail' || ($settings['mailer'] ?? '') === 'gmail') {
+                $host = 'smtp.gmail.com';
+                $port = 587;
+                $encryption = 'tls';
+            } elseif ($this->id === 'outlook' || ($settings['mailer'] ?? '') === 'outlook') {
+                $host = 'smtp.office365.com';
+                $port = 587;
+                $encryption = 'tls';
+            }
+
+            $phpmailer->Host = $host;
+            $phpmailer->Port = $port;
             $phpmailer->Timeout = (int)($settings['smtp_timeout'] ?? 20);
 
             // Encryption
-            $encryption = $settings['smtp_encryption'] ?? 'tls';
             if ($encryption === 'ssl') {
                 $phpmailer->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
             } elseif ($encryption === 'tls') {

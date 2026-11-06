@@ -616,9 +616,14 @@ class OI_Admin {
                     </div>
 
                     <div class="oi-form-group">
-                        <label class="oi-label" for="oi_smtp_pass"><?php esc_html_e('SMTP Password / App Password', 'mail-smtp-by-oi'); ?></label>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <label class="oi-label" for="oi_smtp_pass"><?php esc_html_e('SMTP Password / App Password', 'mail-smtp-by-oi'); ?></label>
+                            <?php if (!empty($settings['smtp_pass'])) : ?>
+                                <span class="oi-key-badge-saved"><span class="dashicons dashicons-yes-alt"></span> <?php esc_html_e('Saved & Encrypted', 'mail-smtp-by-oi'); ?></span>
+                            <?php endif; ?>
+                        </div>
                         <div class="oi-password-wrapper">
-                            <input type="password" class="oi-input" name="smtp_pass" id="oi_smtp_pass" value="<?php echo !empty($settings['smtp_pass']) ? '********' : ''; ?>" placeholder="<?php esc_attr_e('Leave blank to keep existing password', 'mail-smtp-by-oi'); ?>" autocomplete="new-password">
+                            <input type="password" class="oi-input" name="smtp_pass" id="oi_smtp_pass" value="" placeholder="<?php echo !empty($settings['smtp_pass']) ? esc_attr__('•••••••• (Saved - leave blank to keep)', 'mail-smtp-by-oi') : esc_attr__('Enter SMTP Password', 'mail-smtp-by-oi'); ?>" autocomplete="new-password">
                             <button type="button" class="oi-toggle-password-btn" aria-label="Toggle password visibility"><span class="dashicons dashicons-visibility"></span></button>
                         </div>
                         <span class="oi-help"><?php esc_html_e('Encrypted securely in database using AES-256-CBC.', 'mail-smtp-by-oi'); ?></span>
@@ -652,9 +657,14 @@ class OI_Admin {
                 </div>
 
                 <div class="oi-form-group">
-                    <label class="oi-label" for="oi_api_key"><?php esc_html_e('API Key / Server Token', 'mail-smtp-by-oi'); ?> <span class="oi-required">*</span></label>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label class="oi-label" for="oi_api_key"><?php esc_html_e('API Key / Server Token', 'mail-smtp-by-oi'); ?> <span class="oi-required">*</span></label>
+                        <?php if (!empty($settings['api_key'])) : ?>
+                            <span class="oi-key-badge-saved"><span class="dashicons dashicons-yes-alt"></span> <?php esc_html_e('Saved & Encrypted', 'mail-smtp-by-oi'); ?></span>
+                        <?php endif; ?>
+                    </div>
                     <div class="oi-password-wrapper">
-                        <input type="password" class="oi-input" name="api_key" id="oi_api_key" value="<?php echo !empty($settings['api_key']) ? '********' : ''; ?>" placeholder="<?php esc_attr_e('Paste your API Key or Token here', 'mail-smtp-by-oi'); ?>" autocomplete="new-password">
+                        <input type="password" class="oi-input" name="api_key" id="oi_api_key" value="" placeholder="<?php echo !empty($settings['api_key']) ? esc_attr__('•••••••• (Saved - leave blank to keep)', 'mail-smtp-by-oi') : esc_attr__('Paste your API Key or Token here', 'mail-smtp-by-oi'); ?>" autocomplete="new-password">
                         <button type="button" class="oi-toggle-password-btn" aria-label="Toggle visibility"><span class="dashicons dashicons-visibility"></span></button>
                     </div>
                     <span class="oi-help"><?php esc_html_e('Stored with AES-256-CBC encryption. Leave blank to keep existing key.', 'mail-smtp-by-oi'); ?></span>
@@ -665,9 +675,14 @@ class OI_Admin {
             <div id="oi-mailgun-fields" class="oi-conditional-section" style="<?php echo ($settings['mailer'] === 'mailgun') ? '' : 'display:none;'; ?>">
                 <div class="oi-grid-3">
                     <div class="oi-form-group">
-                        <label class="oi-label" for="oi_mailgun_api_key"><?php esc_html_e('Mailgun Private API Key', 'mail-smtp-by-oi'); ?> <span class="oi-required">*</span></label>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <label class="oi-label" for="oi_mailgun_api_key"><?php esc_html_e('Mailgun Private API Key', 'mail-smtp-by-oi'); ?> <span class="oi-required">*</span></label>
+                            <?php if (!empty($settings['mailgun_api_key'])) : ?>
+                                <span class="oi-key-badge-saved"><span class="dashicons dashicons-yes-alt"></span> <?php esc_html_e('Saved', 'mail-smtp-by-oi'); ?></span>
+                            <?php endif; ?>
+                        </div>
                         <div class="oi-password-wrapper">
-                            <input type="password" class="oi-input" name="mailgun_api_key" id="oi_mailgun_api_key" value="<?php echo !empty($settings['mailgun_api_key']) ? '********' : ''; ?>" placeholder="key-xxxx" autocomplete="new-password">
+                            <input type="password" class="oi-input" name="mailgun_api_key" id="oi_mailgun_api_key" value="" placeholder="<?php echo !empty($settings['mailgun_api_key']) ? esc_attr__('•••••••• (Saved - leave blank to keep)', 'mail-smtp-by-oi') : 'key-xxxx'; ?>" autocomplete="new-password">
                             <button type="button" class="oi-toggle-password-btn" aria-label="Toggle visibility"><span class="dashicons dashicons-visibility"></span></button>
                         </div>
                     </div>
@@ -705,9 +720,14 @@ class OI_Admin {
                     </div>
 
                     <div class="oi-form-group">
-                        <label class="oi-label" for="oi_ses_secret_key"><?php esc_html_e('AWS Secret Access Key', 'mail-smtp-by-oi'); ?> <span class="oi-required">*</span></label>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <label class="oi-label" for="oi_ses_secret_key"><?php esc_html_e('AWS Secret Access Key', 'mail-smtp-by-oi'); ?> <span class="oi-required">*</span></label>
+                            <?php if (!empty($settings['ses_secret_key'])) : ?>
+                                <span class="oi-key-badge-saved"><span class="dashicons dashicons-yes-alt"></span> <?php esc_html_e('Saved', 'mail-smtp-by-oi'); ?></span>
+                            <?php endif; ?>
+                        </div>
                         <div class="oi-password-wrapper">
-                            <input type="password" class="oi-input" name="ses_secret_key" id="oi_ses_secret_key" value="<?php echo !empty($settings['ses_secret_key']) ? '********' : ''; ?>" placeholder="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" autocomplete="new-password">
+                            <input type="password" class="oi-input" name="ses_secret_key" id="oi_ses_secret_key" value="" placeholder="<?php echo !empty($settings['ses_secret_key']) ? esc_attr__('•••••••• (Saved - leave blank to keep)', 'mail-smtp-by-oi') : 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'; ?>" autocomplete="new-password">
                             <button type="button" class="oi-toggle-password-btn" aria-label="Toggle visibility"><span class="dashicons dashicons-visibility"></span></button>
                         </div>
                         <span class="oi-help"><?php esc_html_e('Stored securely with AES-256-CBC encryption', 'mail-smtp-by-oi'); ?></span>
@@ -853,8 +873,13 @@ class OI_Admin {
                 <!-- Telegram Channel Details -->
                 <div class="oi-grid-2" style="margin-bottom:14px;">
                     <div class="oi-form-group">
-                        <label class="oi-label" for="oi_telegram_bot_token"><?php esc_html_e('Telegram Bot Token', 'mail-smtp-by-oi'); ?></label>
-                        <input type="password" class="oi-input" name="telegram_bot_token" id="oi_telegram_bot_token" value="<?php echo !empty($settings['telegram_bot_token']) ? '********' : ''; ?>" placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ" autocomplete="new-password">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <label class="oi-label" for="oi_telegram_bot_token"><?php esc_html_e('Telegram Bot Token', 'mail-smtp-by-oi'); ?></label>
+                            <?php if (!empty($settings['telegram_bot_token'])) : ?>
+                                <span class="oi-key-badge-saved"><span class="dashicons dashicons-yes-alt"></span> <?php esc_html_e('Saved', 'mail-smtp-by-oi'); ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <input type="password" class="oi-input" name="telegram_bot_token" id="oi_telegram_bot_token" value="" placeholder="<?php echo !empty($settings['telegram_bot_token']) ? esc_attr__('•••••••• (Saved - leave blank to keep)', 'mail-smtp-by-oi') : '123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ'; ?>" autocomplete="new-password">
                         <span class="oi-help"><?php esc_html_e('Create a bot via @BotFather in Telegram to get your token.', 'mail-smtp-by-oi'); ?></span>
                     </div>
                     <div class="oi-form-group">
@@ -987,52 +1012,54 @@ class OI_Admin {
                         'default'  => 'Default PHP Mail',
                     ];
                     ?>
-                    <table class="widefat fixed striped oi-table" id="oi-routing-rules-table" style="<?php echo empty($routing_rules) ? 'display:none;' : ''; ?>">
-                        <thead>
-                            <tr>
-                                <th style="width:160px;"><span class="oi-condition-chip oi-chip-when">WHEN</span> <?php esc_html_e('Field', 'mail-smtp-by-oi'); ?></th>
-                                <th style="width:140px;"><?php esc_html_e('Operator', 'mail-smtp-by-oi'); ?></th>
-                                <th><?php esc_html_e('Matching Value', 'mail-smtp-by-oi'); ?></th>
-                                <th style="width:180px;"><span class="oi-condition-chip oi-chip-then">ROUTE VIA</span> <?php esc_html_e('Mailer', 'mail-smtp-by-oi'); ?></th>
-                                <th style="width:50px; text-align:center;"><?php esc_html_e('Action', 'mail-smtp-by-oi'); ?></th>
-                            </tr>
-                        </thead>
-                        <tbody id="oi-routing-rules-body">
-                            <?php foreach ($routing_rules as $idx => $rule) : ?>
-                                <tr class="oi-route-rule-row">
-                                    <td>
-                                        <select class="oi-select" name="routing_rules[<?php echo esc_attr($idx); ?>][field]">
-                                            <option value="subject" <?php selected($rule['field'], 'subject'); ?>><?php esc_html_e('Subject', 'mail-smtp-by-oi'); ?></option>
-                                            <option value="to" <?php selected($rule['field'], 'to'); ?>><?php esc_html_e('To Email', 'mail-smtp-by-oi'); ?></option>
-                                            <option value="from" <?php selected($rule['field'], 'from'); ?>><?php esc_html_e('From Email', 'mail-smtp-by-oi'); ?></option>
-                                            <option value="headers" <?php selected($rule['field'], 'headers'); ?>><?php esc_html_e('Headers', 'mail-smtp-by-oi'); ?></option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <select class="oi-select" name="routing_rules[<?php echo esc_attr($idx); ?>][operator]">
-                                            <option value="contains" <?php selected($rule['operator'], 'contains'); ?>><?php esc_html_e('Contains', 'mail-smtp-by-oi'); ?></option>
-                                            <option value="equals" <?php selected($rule['operator'], 'equals'); ?>><?php esc_html_e('Equals', 'mail-smtp-by-oi'); ?></option>
-                                            <option value="starts_with" <?php selected($rule['operator'], 'starts_with'); ?>><?php esc_html_e('Starts With', 'mail-smtp-by-oi'); ?></option>
-                                            <option value="ends_with" <?php selected($rule['operator'], 'ends_with'); ?>><?php esc_html_e('Ends With', 'mail-smtp-by-oi'); ?></option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <input type="text" class="oi-input" name="routing_rules[<?php echo esc_attr($idx); ?>][value]" value="<?php echo esc_attr($rule['value']); ?>" placeholder="e.g. [Order #] or @vipcustomer.com">
-                                    </td>
-                                    <td>
-                                        <select class="oi-select" name="routing_rules[<?php echo esc_attr($idx); ?>][mailer]">
-                                            <?php foreach ($mailers_available as $m_key => $m_label) : ?>
-                                                <option value="<?php echo esc_attr($m_key); ?>" <?php selected($rule['mailer'], $m_key); ?>><?php echo esc_html($m_label); ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </td>
-                                    <td style="text-align:center;">
-                                        <button type="button" class="button oi-btn-delete oi-remove-route-rule-btn" title="<?php esc_attr_e('Remove Rule', 'mail-smtp-by-oi'); ?>">&times;</button>
-                                    </td>
+                    <div class="oi-table-responsive" id="oi-routing-rules-table" style="<?php echo empty($routing_rules) ? 'display:none;' : ''; ?>">
+                        <table class="widefat fixed striped oi-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:160px;"><span class="oi-condition-chip oi-chip-when">WHEN</span> <?php esc_html_e('Field', 'mail-smtp-by-oi'); ?></th>
+                                    <th style="width:140px;"><?php esc_html_e('Operator', 'mail-smtp-by-oi'); ?></th>
+                                    <th><?php esc_html_e('Matching Value', 'mail-smtp-by-oi'); ?></th>
+                                    <th style="width:180px;"><span class="oi-condition-chip oi-chip-then">ROUTE VIA</span> <?php esc_html_e('Mailer', 'mail-smtp-by-oi'); ?></th>
+                                    <th style="width:50px; text-align:center;"><?php esc_html_e('Action', 'mail-smtp-by-oi'); ?></th>
                                 </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody id="oi-routing-rules-body">
+                                <?php foreach ($routing_rules as $idx => $rule) : ?>
+                                    <tr class="oi-route-rule-row">
+                                        <td>
+                                            <select class="oi-select" name="routing_rules[<?php echo esc_attr($idx); ?>][field]">
+                                                <option value="subject" <?php selected($rule['field'], 'subject'); ?>><?php esc_html_e('Subject', 'mail-smtp-by-oi'); ?></option>
+                                                <option value="to_email" <?php selected($rule['field'] === 'to' || $rule['field'] === 'to_email'); ?>><?php esc_html_e('To Email', 'mail-smtp-by-oi'); ?></option>
+                                                <option value="from_email" <?php selected($rule['field'] === 'from' || $rule['field'] === 'from_email'); ?>><?php esc_html_e('From Email', 'mail-smtp-by-oi'); ?></option>
+                                                <option value="headers" <?php selected($rule['field'], 'headers'); ?>><?php esc_html_e('Headers', 'mail-smtp-by-oi'); ?></option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="oi-select" name="routing_rules[<?php echo esc_attr($idx); ?>][operator]">
+                                                <option value="contains" <?php selected($rule['operator'], 'contains'); ?>><?php esc_html_e('Contains', 'mail-smtp-by-oi'); ?></option>
+                                                <option value="equals" <?php selected($rule['operator'], 'equals'); ?>><?php esc_html_e('Equals', 'mail-smtp-by-oi'); ?></option>
+                                                <option value="starts_with" <?php selected($rule['operator'], 'starts_with'); ?>><?php esc_html_e('Starts With', 'mail-smtp-by-oi'); ?></option>
+                                                <option value="ends_with" <?php selected($rule['operator'], 'ends_with'); ?>><?php esc_html_e('Ends With', 'mail-smtp-by-oi'); ?></option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="oi-input" name="routing_rules[<?php echo esc_attr($idx); ?>][value]" value="<?php echo esc_attr($rule['value']); ?>" placeholder="e.g. [Order #] or @vipcustomer.com">
+                                        </td>
+                                        <td>
+                                            <select class="oi-select" name="routing_rules[<?php echo esc_attr($idx); ?>][mailer]">
+                                                <?php foreach ($mailers_available as $m_key => $m_label) : ?>
+                                                    <option value="<?php echo esc_attr($m_key); ?>" <?php selected($rule['mailer'], $m_key); ?>><?php echo esc_html($m_label); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </td>
+                                        <td style="text-align:center;">
+                                            <button type="button" class="button oi-btn-delete oi-remove-route-rule-btn" title="<?php esc_attr_e('Remove Rule', 'mail-smtp-by-oi'); ?>">&times;</button>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                     <div id="oi-no-routing-rules" class="oi-help" style="padding:16px; text-align:center; background:#f8fafc; border-radius:8px; border:1px dashed #cbd5e1; <?php echo !empty($routing_rules) ? 'display:none;' : ''; ?>">
                         <span class="dashicons dashicons-randomize" style="font-size:24px; width:24px; height:24px; color:#94a3b8; display:block; margin:0 auto 6px auto;"></span>
                         <?php esc_html_e('No conditional routing rules configured yet. All emails will use your default mailer.', 'mail-smtp-by-oi'); ?>
@@ -1267,71 +1294,73 @@ class OI_Admin {
                     <p><?php esc_html_e('Outgoing emails will automatically appear here once dispatched.', 'mail-smtp-by-oi'); ?></p>
                 </div>
             <?php else : ?>
-                <table class="wp-list-table widefat fixed striped oi-table">
-                    <thead>
-                        <tr>
-                            <th scope="col" class="manage-column column-cb check-column"><input type="checkbox" id="oi-select-all"></th>
-                            <th scope="col" style="width: 90px;"><?php esc_html_e('Status', 'mail-smtp-by-oi'); ?></th>
-                            <th scope="col"><?php esc_html_e('To', 'mail-smtp-by-oi'); ?></th>
-                            <th scope="col"><?php esc_html_e('Subject', 'mail-smtp-by-oi'); ?></th>
-                            <th scope="col" style="width: 140px;"><?php esc_html_e('Tracking', 'mail-smtp-by-oi'); ?></th>
-                            <th scope="col" style="width: 100px;"><?php esc_html_e('Mailer', 'mail-smtp-by-oi'); ?></th>
-                            <th scope="col" style="width: 140px;"><?php esc_html_e('Date / Time', 'mail-smtp-by-oi'); ?></th>
-                            <th scope="col" style="width: 160px; text-align:right;"><?php esc_html_e('Actions', 'mail-smtp-by-oi'); ?></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($items as $row) : ?>
-                            <tr id="oi-log-row-<?php echo esc_attr($row['id']); ?>">
-                                <th scope="row" class="check-column">
-                                    <input type="checkbox" class="oi-log-cb" value="<?php echo esc_attr($row['id']); ?>">
-                                </th>
-                                <td>
-                                    <?php if ($row['status'] === 'sent') : ?>
-                                        <span class="oi-badge oi-badge-sent"><span class="dashicons dashicons-yes" style="font-size:12px; width:12px; height:12px; line-height:1; vertical-align:middle;"></span> <?php esc_html_e('Sent', 'mail-smtp-by-oi'); ?></span>
-                                    <?php else : ?>
-                                        <span class="oi-badge oi-badge-failed" title="<?php echo esc_attr($row['error_message']); ?>"><span class="dashicons dashicons-warning" style="font-size:12px; width:12px; height:12px; line-height:1; vertical-align:middle;"></span> <?php esc_html_e('Failed', 'mail-smtp-by-oi'); ?></span>
-                                    <?php endif; ?>
-                                </td>
-                                <td><strong><?php echo esc_html($row['to_email']); ?></strong></td>
-                                <td>
-                                    <?php echo esc_html($row['subject']); ?>
-                                    <?php if (!empty($row['attachments'])) : ?>
-                                        <span class="dashicons dashicons-paperclip" title="<?php esc_attr_e('Has attachments', 'mail-smtp-by-oi'); ?>" style="font-size:14px; width:14px; height:14px; color:#4f46e5; vertical-align:middle; margin-left:6px;"></span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <?php if (!empty($row['open_count'])) : ?>
-                                        <span class="oi-badge oi-badge-sent" title="<?php printf(esc_attr__('Opened %d times. Last: %s', 'mail-smtp-by-oi'), (int)$row['open_count'], esc_attr($row['last_opened_at'] ?? '')); ?>" style="cursor:help;">
-                                            <span class="dashicons dashicons-visibility" style="font-size:12px; line-height:1; vertical-align:middle; margin-right:2px;"></span><?php printf(esc_html__('%d Open%s', 'mail-smtp-by-oi'), (int)$row['open_count'], (int)$row['open_count'] > 1 ? 's' : ''); ?>
-                                        </span>
-                                    <?php else : ?>
-                                        <span style="color:#94a3b8; font-size:12px;"><?php esc_html_e('Unopened', 'mail-smtp-by-oi'); ?></span>
-                                    <?php endif; ?>
-
-                                    <?php if (!empty($row['click_count'])) : ?>
-                                        <span class="oi-badge" style="background:#e0e7ff; color:#3730a3; margin-left:4px; cursor:help;" title="<?php printf(esc_attr__('Clicked %d times. Last: %s', 'mail-smtp-by-oi'), (int)$row['click_count'], esc_attr($row['last_clicked_at'] ?? '')); ?>">
-                                            <span class="dashicons dashicons-external" style="font-size:12px; line-height:1; vertical-align:middle; margin-right:2px;"></span><?php printf(esc_html__('%d Click%s', 'mail-smtp-by-oi'), (int)$row['click_count'], (int)$row['click_count'] > 1 ? 's' : ''); ?>
-                                        </span>
-                                    <?php endif; ?>
-                                </td>
-                                <td><code><?php echo esc_html(strtoupper($row['mailer'])); ?></code></td>
-                                <td><span class="oi-date-text"><?php echo esc_html(get_date_from_gmt($row['created_at'], 'Y-m-d H:i:s')); ?></span></td>
-                                <td style="text-align:right;">
-                                    <button type="button" class="button oi-btn-sm oi-view-log-btn" data-id="<?php echo esc_attr($row['id']); ?>" title="<?php esc_attr_e('View email preview and details', 'mail-smtp-by-oi'); ?>">
-                                        <?php esc_html_e('View', 'mail-smtp-by-oi'); ?>
-                                    </button>
-                                    <button type="button" class="button oi-btn-sm oi-resend-btn" data-id="<?php echo esc_attr($row['id']); ?>" title="<?php esc_attr_e('Resend email', 'mail-smtp-by-oi'); ?>">
-                                        <?php esc_html_e('Resend', 'mail-smtp-by-oi'); ?>
-                                    </button>
-                                    <button type="button" class="button oi-btn-sm oi-btn-delete oi-delete-log-btn" data-id="<?php echo esc_attr($row['id']); ?>" title="<?php esc_attr_e('Delete log', 'mail-smtp-by-oi'); ?>">
-                                        &times;
-                                    </button>
-                                </td>
+                <div class="oi-table-responsive">
+                    <table class="wp-list-table widefat fixed striped oi-table">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="manage-column column-cb check-column"><input type="checkbox" id="oi-select-all"></th>
+                                <th scope="col" style="width: 90px;"><?php esc_html_e('Status', 'mail-smtp-by-oi'); ?></th>
+                                <th scope="col"><?php esc_html_e('To', 'mail-smtp-by-oi'); ?></th>
+                                <th scope="col"><?php esc_html_e('Subject', 'mail-smtp-by-oi'); ?></th>
+                                <th scope="col" style="width: 140px;"><?php esc_html_e('Tracking', 'mail-smtp-by-oi'); ?></th>
+                                <th scope="col" style="width: 100px;"><?php esc_html_e('Mailer', 'mail-smtp-by-oi'); ?></th>
+                                <th scope="col" style="width: 140px;"><?php esc_html_e('Date / Time', 'mail-smtp-by-oi'); ?></th>
+                                <th scope="col" style="width: 160px; text-align:right;"><?php esc_html_e('Actions', 'mail-smtp-by-oi'); ?></th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($items as $row) : ?>
+                                <tr id="oi-log-row-<?php echo esc_attr($row['id']); ?>">
+                                    <th scope="row" class="check-column">
+                                        <input type="checkbox" class="oi-log-cb" value="<?php echo esc_attr($row['id']); ?>">
+                                    </th>
+                                    <td>
+                                        <?php if ($row['status'] === 'sent') : ?>
+                                            <span class="oi-badge oi-badge-sent"><span class="dashicons dashicons-yes" style="font-size:12px; width:12px; height:12px; line-height:1; vertical-align:middle;"></span> <?php esc_html_e('Sent', 'mail-smtp-by-oi'); ?></span>
+                                        <?php else : ?>
+                                            <span class="oi-badge oi-badge-failed" title="<?php echo esc_attr($row['error_message']); ?>"><span class="dashicons dashicons-warning" style="font-size:12px; width:12px; height:12px; line-height:1; vertical-align:middle;"></span> <?php esc_html_e('Failed', 'mail-smtp-by-oi'); ?></span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><strong><?php echo esc_html($row['to_email']); ?></strong></td>
+                                    <td>
+                                        <?php echo esc_html($row['subject']); ?>
+                                        <?php if (!empty($row['attachments'])) : ?>
+                                            <span class="dashicons dashicons-paperclip" title="<?php esc_attr_e('Has attachments', 'mail-smtp-by-oi'); ?>" style="font-size:14px; width:14px; height:14px; color:#4f46e5; vertical-align:middle; margin-left:6px;"></span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if (!empty($row['open_count'])) : ?>
+                                            <span class="oi-badge oi-badge-sent" title="<?php printf(esc_attr__('Opened %d times. Last: %s', 'mail-smtp-by-oi'), (int)$row['open_count'], esc_attr($row['last_opened_at'] ?? '')); ?>" style="cursor:help;">
+                                                <span class="dashicons dashicons-visibility" style="font-size:12px; line-height:1; vertical-align:middle; margin-right:2px;"></span><?php printf(esc_html__('%d Open%s', 'mail-smtp-by-oi'), (int)$row['open_count'], (int)$row['open_count'] > 1 ? 's' : ''); ?>
+                                            </span>
+                                        <?php else : ?>
+                                            <span style="color:#94a3b8; font-size:12px;"><?php esc_html_e('Unopened', 'mail-smtp-by-oi'); ?></span>
+                                        <?php endif; ?>
+
+                                        <?php if (!empty($row['click_count'])) : ?>
+                                            <span class="oi-badge" style="background:#e0e7ff; color:#3730a3; margin-left:4px; cursor:help;" title="<?php printf(esc_attr__('Clicked %d times. Last: %s', 'mail-smtp-by-oi'), (int)$row['click_count'], esc_attr($row['last_clicked_at'] ?? '')); ?>">
+                                                <span class="dashicons dashicons-external" style="font-size:12px; line-height:1; vertical-align:middle; margin-right:2px;"></span><?php printf(esc_html__('%d Click%s', 'mail-smtp-by-oi'), (int)$row['click_count'], (int)$row['click_count'] > 1 ? 's' : ''); ?>
+                                            </span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><code><?php echo esc_html(strtoupper($row['mailer'])); ?></code></td>
+                                    <td><span class="oi-date-text"><?php echo esc_html($row['created_at']); ?></span></td>
+                                    <td style="text-align:right;">
+                                        <button type="button" class="button oi-btn-sm oi-view-log-btn" data-id="<?php echo esc_attr($row['id']); ?>" title="<?php esc_attr_e('View email preview and details', 'mail-smtp-by-oi'); ?>">
+                                            <?php esc_html_e('View', 'mail-smtp-by-oi'); ?>
+                                        </button>
+                                        <button type="button" class="button oi-btn-sm oi-resend-btn" data-id="<?php echo esc_attr($row['id']); ?>" title="<?php esc_attr_e('Resend email', 'mail-smtp-by-oi'); ?>">
+                                            <?php esc_html_e('Resend', 'mail-smtp-by-oi'); ?>
+                                        </button>
+                                        <button type="button" class="button oi-btn-sm oi-btn-delete oi-delete-log-btn" data-id="<?php echo esc_attr($row['id']); ?>" title="<?php esc_attr_e('Delete log', 'mail-smtp-by-oi'); ?>">
+                                            &times;
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
 
                 <!-- Bulk Actions & Pagination -->
                 <div class="oi-table-footer">
@@ -1415,6 +1444,56 @@ class OI_Admin {
                         <button type="button" class="button oi-btn-xs" id="oi-copy-debug-btn"><?php esc_html_e('Copy Log', 'mail-smtp-by-oi'); ?></button>
                     </div>
                     <pre class="oi-terminal-body" id="oi-terminal-body"></pre>
+                </div>
+            </div>
+
+            <?php
+            $from_domain_dns = OI_Diagnostics::check_dns();
+            ?>
+            <div class="oi-card" style="margin-top:24px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:20px 24px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span class="dashicons dashicons-shield" style="font-size:22px; width:22px; height:22px; color:#4f46e5;"></span>
+                        <div>
+                            <strong style="font-size:15px; color:#0f172a; display:block;"><?php esc_html_e('Domain Deliverability & Spam Protection Check', 'mail-smtp-by-oi'); ?></strong>
+                            <span class="oi-help" style="margin:0;"><?php printf(esc_html__('Checking DNS records for: %s', 'mail-smtp-by-oi'), '<strong>' . esc_html($from_domain_dns['domain']) . '</strong>'); ?></span>
+                        </div>
+                    </div>
+                    <div>
+                        <?php if ($from_domain_dns['spf']['found'] && $from_domain_dns['dmarc']['found']) : ?>
+                            <span class="oi-badge oi-badge-sent"><span class="dashicons dashicons-yes" style="font-size:12px; vertical-align:middle;"></span> <?php esc_html_e('Deliverability Health: Excellent', 'mail-smtp-by-oi'); ?></span>
+                        <?php else : ?>
+                            <span class="oi-badge oi-badge-failed"><span class="dashicons dashicons-warning" style="font-size:12px; vertical-align:middle;"></span> <?php esc_html_e('Action Recommended', 'mail-smtp-by-oi'); ?></span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="oi-grid-2" style="margin-top:12px;">
+                    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:14px 16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                            <strong><?php esc_html_e('SPF Record', 'mail-smtp-by-oi'); ?></strong>
+                            <span class="oi-badge <?php echo $from_domain_dns['spf']['found'] ? 'oi-badge-sent' : 'oi-badge-failed'; ?>">
+                                <?php echo $from_domain_dns['spf']['found'] ? '✔ PASS' : '✖ MISSING'; ?>
+                            </span>
+                        </div>
+                        <p style="font-size:12px; color:#64748b; margin:0;"><?php echo esc_html($from_domain_dns['spf']['tip']); ?></p>
+                        <?php if ($from_domain_dns['spf']['found']) : ?>
+                            <code style="font-size:11px; display:block; margin-top:6px; word-break:break-all;"><?php echo esc_html($from_domain_dns['spf']['record']); ?></code>
+                        <?php endif; ?>
+                    </div>
+
+                    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:14px 16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                            <strong><?php esc_html_e('DMARC Record', 'mail-smtp-by-oi'); ?></strong>
+                            <span class="oi-badge <?php echo $from_domain_dns['dmarc']['found'] ? 'oi-badge-sent' : 'oi-badge-failed'; ?>">
+                                <?php echo $from_domain_dns['dmarc']['found'] ? '✔ PASS' : '✖ MISSING'; ?>
+                            </span>
+                        </div>
+                        <p style="font-size:12px; color:#64748b; margin:0;"><?php echo esc_html($from_domain_dns['dmarc']['tip']); ?></p>
+                        <?php if ($from_domain_dns['dmarc']['found']) : ?>
+                            <code style="font-size:11px; display:block; margin-top:6px; word-break:break-all;"><?php echo esc_html($from_domain_dns['dmarc']['record']); ?></code>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1706,7 +1785,7 @@ class OI_Admin {
                 'click_count'       => (int)($log['click_count'] ?? 0),
                 'last_opened_at'    => !empty($log['last_opened_at']) ? esc_html($log['last_opened_at']) : '',
                 'last_clicked_at'   => !empty($log['last_clicked_at']) ? esc_html($log['last_clicked_at']) : '',
-                'date'              => esc_html(get_date_from_gmt($log['created_at'], 'Y-m-d H:i:s')),
+                'date'              => esc_html($log['created_at']),
             ],
         ]);
     }

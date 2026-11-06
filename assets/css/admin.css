@@ -372,7 +372,17 @@
     border-bottom: 2px solid var(--oi-gray-200);
     margin-bottom: 24px;
     display: flex;
-    gap: 6px;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 4px;
+}
+
+.oi-nav-tabs::-webkit-scrollbar {
+    display: none;
 }
 
 .oi-nav-tabs .nav-tab {
@@ -389,6 +399,9 @@
     gap: 8px;
     transition: all 0.2s ease;
     border-radius: var(--oi-radius-sm) var(--oi-radius-sm) 0 0;
+    flex-shrink: 0;
+    min-height: 44px;
+    touch-action: manipulation;
 }
 
 .oi-nav-tabs .nav-tab:hover {
@@ -1541,7 +1554,45 @@ input:checked + .oi-slider:before {
     gap: 14px;
 }
 
-/* Responsive adjustments */
+/* Table Responsive Wrapper & Badges */
+.oi-table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 16px;
+    border-radius: var(--oi-radius-sm);
+    box-shadow: var(--oi-shadow-sm);
+}
+
+.oi-key-badge-saved {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #065f46;
+    background: #d1fae5;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid #a7f3d0;
+}
+
+.oi-key-badge-saved .dashicons {
+    font-size: 13px;
+    width: 13px;
+    height: 13px;
+    line-height: 1;
+}
+
+/* ==========================================================================
+   Android & Mobile Responsive Optimizations (Screen Width <= 782px & <= 600px)
+   ========================================================================== */
+#oi-mail-smtp-wrap {
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
 @media screen and (max-width: 782px) {
     .oi-grid-2,
     .oi-grid-3 {
@@ -1551,8 +1602,137 @@ input:checked + .oi-slider:before {
         flex-direction: column;
         align-items: flex-start;
         gap: 18px;
+        padding: 22px 20px;
+    }
+    .oi-header-actions {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .oi-header-actions .button {
+        flex: 1;
+        text-align: center;
+        justify-content: center;
+        min-height: 44px;
     }
     .oi-bars-container {
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 6px;
+    }
+    .oi-bar-col {
+        min-width: 44px;
+    }
+    .oi-card {
+        padding: 20px 18px;
+    }
+    .oi-card-header.oi-flex-between {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+    .oi-actions-group {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    .oi-actions-group .button {
+        flex: 1;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .oi-toolbar-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    .oi-search-box {
+        width: 100%;
+    }
+    .oi-search-input {
+        width: 100% !important;
+    }
+    .oi-modal-container {
+        width: 95%;
+        max-height: 90vh;
+        margin: 5vh auto;
+    }
+    .oi-modal-header {
+        padding: 14px 18px;
+    }
+    .oi-modal-body {
+        padding: 16px;
+    }
+    .oi-modal-nav {
+        padding: 0 10px;
+        overflow-x: auto;
+        white-space: nowrap;
+        scrollbar-width: none;
+    }
+    .oi-modal-nav::-webkit-scrollbar {
+        display: none;
+    }
+    .oi-modal-tab {
+        flex-shrink: 0;
+        min-height: 44px;
+        padding: 12px 14px;
+    }
+    .oi-input,
+    .oi-select,
+    .oi-textarea {
+        font-size: 16px; /* Prevents iOS/Android auto-zoom on focus */
+        min-height: 44px;
+    }
+    .oi-toggle-password-btn {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .oi-mailers-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .oi-mailer-card {
+        padding: 14px 16px;
+        min-height: 48px;
+    }
+    .oi-stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    .oi-stat-card {
+        padding: 16px 14px;
+    }
+    .oi-stat-value {
+        font-size: 24px;
+    }
+    .oi-trend-card {
+        padding: 18px 14px;
+    }
+    .oi-trend-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .oi-btn,
+    .button-hero {
+        width: 100%;
+        min-height: 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+@media screen and (max-width: 380px) {
+    .oi-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .oi-header-title {
+        font-size: 20px;
     }
 }

@@ -39,8 +39,11 @@ class OI_Tracker {
             self::record_click($hash);
 
             if (!empty($target)) {
-                wp_redirect($target, 302);
-                exit;
+                $scheme = wp_parse_url($target, PHP_URL_SCHEME);
+                if (in_array($scheme, ['http', 'https'], true)) {
+                    wp_redirect($target, 302);
+                    exit;
+                }
             }
 
             wp_safe_redirect(home_url());
@@ -144,7 +147,7 @@ class OI_Tracker {
 
                 $tracking_url = add_query_arg([
                     'oi_track_click' => $tracking_hash,
-                    'url'            => urlencode($original_url),
+                    'url'            => $original_url,
                 ], $site_url);
 
                 return str_replace($matches[2], esc_url($tracking_url), $matches[0]);
