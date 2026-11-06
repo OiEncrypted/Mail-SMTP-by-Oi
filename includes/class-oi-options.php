@@ -61,9 +61,37 @@ class OI_Options {
             'log_retention_days' => 30, // 0 = keep forever, 7, 14, 30, 60, 90
             'delete_on_uninstall'=> false,
 
-            // Fallback
-            'enable_fallback'    => false,
-            'fallback_mailer'    => 'default',
+            // Fallback & Alerts
+            'enable_fallback'        => false,
+            'fallback_mailer'        => 'default',
+            'enable_failure_alerts'  => false,
+            'failure_alert_email'    => $admin_email,
+            'alert_channels'         => ['email'], // 'email', 'telegram', 'slack', 'discord'
+            'telegram_bot_token'     => '',
+            'telegram_chat_id'       => '',
+            'slack_webhook_url'      => '',
+            'discord_webhook_url'    => '',
+
+            // Amazon SES
+            'ses_access_key'         => '',
+            'ses_secret_key'         => '',
+            'ses_region'             => 'us-east-1',
+
+            // Tracking & Background Queue
+            'enable_open_tracking'   => true,
+            'enable_click_tracking'  => true,
+            'enable_queue'           => false,
+
+            // Enterprise Features: Smart Routing, Weekly Digest & Attachment Vault
+            'routing_rules'          => [],
+            'enable_weekly_digest'   => true,
+            'digest_recipient_email' => $admin_email,
+            'save_attachments'       => true,
+
+            // Developer Staging & Email Controls (Reference from FluentSMTP & WP Mail SMTP Pro)
+            'enable_simulation_mode' => false,
+            'reroute_all_to'         => '',
+            'email_controls'         => [],
         ];
     }
 
@@ -85,7 +113,7 @@ class OI_Options {
         $settings = self::$settings;
 
         if ($decrypt) {
-            $sensitive_keys = ['smtp_pass', 'api_key', 'mailgun_api_key'];
+            $sensitive_keys = ['smtp_pass', 'api_key', 'mailgun_api_key', 'ses_access_key', 'ses_secret_key', 'telegram_bot_token'];
             foreach ($sensitive_keys as $key) {
                 if (!empty($settings[$key])) {
                     $settings[$key] = OI_Encryption::decrypt($settings[$key]);
@@ -129,11 +157,16 @@ class OI_Options {
         $cleaned['smtp_autotls']      = !empty($raw_data['smtp_autotls']);
         $cleaned['enable_logging']    = !empty($raw_data['enable_logging']);
         $cleaned['log_body']          = !empty($raw_data['log_body']);
-        $cleaned['delete_on_uninstall'] = !empty($raw_data['delete_on_uninstall']);
-        $cleaned['enable_fallback']   = !empty($raw_data['enable_fallback']);
+        $cleaned['delete_on_uninstall']  = !empty($raw_data['delete_on_uninstall']);
+        $cleaned['enable_fallback']      = !empty($raw_data['enable_fallback']);
+        $cleaned['enable_failure_alerts'] = !empty($raw_data['enable_failure_alerts']);
+        $cleaned['failure_alert_email']  = !empty($raw_data['failure_alert_email']) ? sanitize_email($raw_data['failure_alert_email']) : $defaults['failure_alert_email'];
+        $cleaned['enable_open_tracking']  = !empty($raw_data['enable_open_tracking']);
+        $cleaned['enable_click_tracking'] = !empty($raw_data['enable_click_tracking']);
+        $cleaned['enable_queue']          = !empty($raw_data['enable_queue']);
 
         // Text & Select fields
-        $cleaned['mailer'] = in_array($raw_data['mailer'] ?? '', ['smtp', 'gmail', 'outlook', 'sendgrid', 'mailgun', 'brevo', 'postmark', 'resend', 'default'], true)
+        $cleaned['mailer'] = in_array($raw_data['mailer'] ?? '', ['smtp', 'gmail', 'outlook', 'sendgrid', 'mailgun', 'brevo', 'postmark', 'resend', 'ses', 'default'], true)
             ? $raw_data['mailer'] : 'smtp';
 
         $cleaned['from_email'] = !empty($raw_data['from_email']) ? sanitize_email($raw_data['from_email']) : $defaults['from_email'];
@@ -168,8 +201,71 @@ class OI_Options {
         $cleaned['mailgun_domain'] = !empty($raw_data['mailgun_domain']) ? sanitize_text_field(trim($raw_data['mailgun_domain'])) : '';
         $cleaned['mailgun_region'] = ($raw_data['mailgun_region'] ?? 'us') === 'eu' ? 'eu' : 'us';
 
+        // Amazon SES specifics
+        if (isset($raw_data['ses_access_key']) && $raw_data['ses_access_key'] !== '') {
+            $cleaned['ses_access_key'] = OI_Encryption::encrypt(trim($raw_data['ses_access_key']));
+        } else {
+            $cleaned['ses_access_key'] = !empty($current['ses_access_key']) ? OI_Encryption::encrypt($current['ses_access_key']) : '';
+        }
+        if (isset($raw_data['ses_secret_key']) && $raw_data['ses_secret_key'] !== '') {
+            $cleaned['ses_secret_key'] = OI_Encryption::encrypt(trim($raw_data['ses_secret_key']));
+        } else {
+            $cleaned['ses_secret_key'] = !empty($current['ses_secret_key']) ? OI_Encryption::encrypt($current['ses_secret_key']) : '';
+        }
+        $cleaned['ses_region'] = !empty($raw_data['ses_region']) ? sanitize_text_field(trim($raw_data['ses_region'])) : 'us-east-1';
+
+        // Multi-channel failure alerts
+        $allowed_channels = ['email', 'telegram', 'slack', 'discord'];
+        $raw_channels = isset($raw_data['alert_channels']) ? (array)$raw_data['alert_channels'] : ['email'];
+        $cleaned['alert_channels'] = array_values(array_intersect($allowed_channels, $raw_channels));
+        if (empty($cleaned['alert_channels'])) {
+            $cleaned['alert_channels'] = ['email'];
+        }
+
+        if (isset($raw_data['telegram_bot_token']) && $raw_data['telegram_bot_token'] !== '') {
+            $cleaned['telegram_bot_token'] = OI_Encryption::encrypt(trim($raw_data['telegram_bot_token']));
+        } else {
+            $cleaned['telegram_bot_token'] = !empty($current['telegram_bot_token']) ? OI_Encryption::encrypt($current['telegram_bot_token']) : '';
+        }
+        $cleaned['telegram_chat_id']    = !empty($raw_data['telegram_chat_id']) ? sanitize_text_field(trim($raw_data['telegram_chat_id'])) : '';
+        $cleaned['slack_webhook_url']   = !empty($raw_data['slack_webhook_url']) ? esc_url_raw(trim($raw_data['slack_webhook_url'])) : '';
+        $cleaned['discord_webhook_url'] = !empty($raw_data['discord_webhook_url']) ? esc_url_raw(trim($raw_data['discord_webhook_url'])) : '';
+
         $cleaned['log_retention_days'] = isset($raw_data['log_retention_days']) ? absint($raw_data['log_retention_days']) : 30;
         $cleaned['fallback_mailer']    = sanitize_text_field($raw_data['fallback_mailer'] ?? 'default');
+
+        // Enterprise Features
+        $cleaned['enable_weekly_digest']   = !empty($raw_data['enable_weekly_digest']);
+        $cleaned['digest_recipient_email'] = !empty($raw_data['digest_recipient_email']) ? sanitize_email($raw_data['digest_recipient_email']) : $defaults['digest_recipient_email'];
+        $cleaned['save_attachments']       = !empty($raw_data['save_attachments']);
+
+        $cleaned['routing_rules'] = [];
+        if (!empty($raw_data['routing_rules']) && is_array($raw_data['routing_rules'])) {
+            foreach ($raw_data['routing_rules'] as $rule) {
+                if (!empty($rule['mailer']) && !empty($rule['field']) && isset($rule['value']) && trim($rule['value']) !== '') {
+                    $cleaned['routing_rules'][] = [
+                        'field'    => sanitize_key($rule['field']),
+                        'operator' => sanitize_key($rule['operator'] ?? 'contains'),
+                        'value'    => sanitize_text_field(trim($rule['value'])),
+                        'mailer'   => sanitize_key($rule['mailer']),
+                    ];
+                }
+            }
+        }
+
+        // Staging Simulation Mode & Reroute All (FluentSMTP Feature)
+        $cleaned['enable_simulation_mode'] = !empty($raw_data['enable_simulation_mode']);
+        $cleaned['reroute_all_to']         = !empty($raw_data['reroute_all_to']) ? sanitize_email($raw_data['reroute_all_to']) : '';
+
+        // Email Controls (WP Mail SMTP Pro Feature)
+        $cleaned['email_controls'] = [];
+        if (!empty($raw_data['email_controls']) && is_array($raw_data['email_controls'])) {
+            foreach ($raw_data['email_controls'] as $control_key => $val) {
+                if (!empty($val)) {
+                    $cleaned['email_controls'][sanitize_key($control_key)] = 1;
+                }
+            }
+        }
 
         self::$settings = null; // flush cache
         return update_option(self::OPTION_KEY, $cleaned);

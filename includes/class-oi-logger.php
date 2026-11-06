@@ -39,9 +39,15 @@ class OI_Logger {
             status varchar(20) NOT NULL DEFAULT 'sent',
             error_message text NULL,
             debug_log longtext NULL,
+            tracking_hash varchar(64) NULL,
+            open_count int(11) NOT NULL DEFAULT 0,
+            click_count int(11) NOT NULL DEFAULT 0,
+            last_opened_at datetime NULL,
+            last_clicked_at datetime NULL,
             created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY  (id),
             KEY status (status),
+            KEY tracking_hash (tracking_hash),
             KEY created_at (created_at)
         ) $charset_collate;";
 
@@ -90,6 +96,9 @@ class OI_Logger {
             'status'        => ($data['status'] ?? 'sent') === 'sent' ? 'sent' : 'failed',
             'error_message' => !empty($data['error_message']) ? sanitize_text_field($data['error_message']) : null,
             'debug_log'     => !empty($data['debug_log']) ? $data['debug_log'] : null,
+            'tracking_hash' => !empty($data['tracking_hash']) ? sanitize_text_field($data['tracking_hash']) : null,
+            'open_count'    => !empty($data['open_count']) ? absint($data['open_count']) : 0,
+            'click_count'   => !empty($data['click_count']) ? absint($data['click_count']) : 0,
             'created_at'    => current_time('mysql'),
         ];
 
@@ -205,26 +214,56 @@ class OI_Logger {
     }
 
     /**
-     * Resend an email from log
+     * Get email statistics for today
+     *
+     * @return array
+     */
+    public static function get_today_stats() {
+        global $wpdb;
+        $table = self::get_table_name();
+
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table'") !== $table) {
+            return ['total' => 0, 'sent' => 0, 'failed' => 0, 'rate' => 100];
+        }
+
+        $today = current_time('Y-m-d');
+        $sent   = (int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table WHERE status = 'sent' AND DATE(created_at) = %s", $today));
+        $failed = (int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table WHERE status = 'failed' AND DATE(created_at) = %s", $today));
+        $total  = $sent + $failed;
+        $rate   = $total > 0 ? round(($sent / $total) * 100, 1) : 100;
+
+        return [
+            'total'  => $total,
+            'sent'   => $sent,
+            'failed' => $failed,
+            'rate'   => $rate,
+        ];
+    }
+
+    /**
+     * Resend an email from log (supports custom recipient and overrides)
      *
      * @param int $id
+     * @param string $override_to
+     * @param string $override_subject
+     * @param string $override_message
      * @return array ['success' => bool, 'message' => string]
      */
-    public static function resend($id) {
+    public static function resend($id, $override_to = '', $override_subject = '', $override_message = '') {
         $log = self::get_log($id);
         if (!$log) {
             return ['success' => false, 'message' => __('Log entry not found.', 'mail-smtp-by-oi')];
         }
 
-        $to      = $log['to_email'];
-        $subject = '[Resent] ' . $log['subject'];
-        $message = $log['message'];
+        $to      = !empty($override_to) && is_email($override_to) ? $override_to : $log['to_email'];
+        $subject = !empty($override_subject) ? $override_subject : ('[Resent] ' . $log['subject']);
+        $message = !empty($override_message) ? $override_message : $log['message'];
         $headers = !empty($log['headers']) ? explode("\n", $log['headers']) : [];
 
         $sent = wp_mail($to, $subject, $message, $headers);
 
         if ($sent) {
-            return ['success' => true, 'message' => sprintf(__('Email successfully resent to %s.', 'mail-smtp-by-oi'), esc_html($to))];
+            return ['success' => true, 'message' => sprintf(__('Email successfully dispatched to %s.', 'mail-smtp-by-oi'), esc_html($to))];
         }
 
         return ['success' => false, 'message' => __('Failed to resend email. Check error logs for details.', 'mail-smtp-by-oi')];
@@ -239,6 +278,7 @@ class OI_Logger {
     public static function delete($id) {
         global $wpdb;
         $table = self::get_table_name();
+        OI_Attachments::delete_log_attachments($id);
         return (bool)$wpdb->delete($table, ['id' => absint($id)], ['%d']);
     }
 
@@ -256,9 +296,139 @@ class OI_Logger {
             return 0;
         }
 
+        foreach ($clean_ids as $cid) {
+            OI_Attachments::delete_log_attachments($cid);
+        }
+
         $placeholders = implode(',', array_fill(0, count($clean_ids), '%d'));
         $sql = "DELETE FROM $table WHERE id IN ($placeholders)";
         return (int)$wpdb->query($wpdb->prepare($sql, $clean_ids));
+    }
+
+    /**
+     * Get daily delivery statistics for the last X days
+     *
+     * @param int $days
+     * @return array
+     */
+    public static function get_daily_stats($days = 7) {
+        global $wpdb;
+        $table = self::get_table_name();
+
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table'") !== $table) {
+            return ['days' => [], 'max_count' => 1];
+        }
+
+        $daily_data = [];
+        $max_count  = 1;
+
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $date = gmdate('Y-m-d', strtotime("-$i days"));
+            $daily_data[$date] = [
+                'date'      => $date,
+                'label'     => gmdate('M j', strtotime($date)),
+                'sent'      => 0,
+                'failed'    => 0,
+                'total'     => 0,
+            ];
+        }
+
+        $start_date = gmdate('Y-m-d 00:00:00', strtotime('-' . ($days - 1) . ' days'));
+        $sql = "SELECT DATE(created_at) as log_date, status, COUNT(*) as count 
+                FROM $table 
+                WHERE created_at >= %s 
+                GROUP BY DATE(created_at), status";
+
+        $results = $wpdb->get_results($wpdb->prepare($sql, $start_date), ARRAY_A);
+
+        if ($results) {
+            foreach ($results as $row) {
+                $d = $row['log_date'];
+                $s = $row['status'];
+                $c = (int)$row['count'];
+                if (isset($daily_data[$d])) {
+                    if ($s === 'sent') {
+                        $daily_data[$d]['sent'] += $c;
+                    } else {
+                        $daily_data[$d]['failed'] += $c;
+                    }
+                    $daily_data[$d]['total'] += $c;
+                    if ($daily_data[$d]['total'] > $max_count) {
+                        $max_count = $daily_data[$d]['total'];
+                    }
+                }
+            }
+        }
+
+        return [
+            'days'      => array_values($daily_data),
+            'max_count' => $max_count,
+        ];
+    }
+
+    /**
+     * Export logs to CSV format
+     *
+     * @param array $args
+     */
+    public static function export_csv(array $args = []) {
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('Unauthorized.', 'mail-smtp-by-oi'));
+        }
+
+        global $wpdb;
+        $table = self::get_table_name();
+
+        $where = ['1=1'];
+        $values = [];
+
+        if (!empty($args['status']) && in_array($args['status'], ['sent', 'failed'], true)) {
+            $where[] = 'status = %s';
+            $values[] = $args['status'];
+        }
+
+        if (!empty($args['search'])) {
+            $like = '%' . $wpdb->esc_like(trim($args['search'])) . '%';
+            $where[] = '(to_email LIKE %s OR subject LIKE %s)';
+            $values[] = $like;
+            $values[] = $like;
+        }
+
+        $where_clause = implode(' AND ', $where);
+        $sql = "SELECT id, to_email, subject, mailer, status, error_message, created_at FROM $table WHERE $where_clause ORDER BY id DESC LIMIT 5000";
+
+        if (!empty($values)) {
+            $rows = $wpdb->get_results($wpdb->prepare($sql, $values), ARRAY_A);
+        } else {
+            $rows = $wpdb->get_results($sql, ARRAY_A);
+        }
+
+        $filename = 'oi-mail-smtp-logs-' . gmdate('Y-m-d-His') . '.csv';
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=' . $filename);
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        $output = fopen('php://output', 'w');
+        fputcsv($output, ['ID', 'To Email', 'Subject', 'Mailer', 'Status', 'Error Message', 'Date (UTC)']);
+
+        if (!empty($rows)) {
+            foreach ($rows as $row) {
+                fputcsv($output, [
+                    $row['id'],
+                    $row['to_email'],
+                    $row['subject'],
+                    $row['mailer'],
+                    $row['status'],
+                    $row['error_message'],
+                    $row['created_at'],
+                ]);
+            }
+        }
+
+        fclose($output);
+        exit;
     }
 
     /**

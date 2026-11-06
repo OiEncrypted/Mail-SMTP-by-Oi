@@ -31,6 +31,20 @@ class OI_Mailer {
     private static $phpmailer_debug = [];
 
     /**
+     * Flag to bypass queue during direct dispatch
+     *
+     * @var bool
+     */
+    private static $is_direct_dispatch = false;
+
+    /**
+     * Tracking hash for the currently dispatched email
+     *
+     * @var string|null
+     */
+    private static $current_tracking_hash = null;
+
+    /**
      * Initialize hooks
      */
     public static function init() {
@@ -64,12 +78,14 @@ class OI_Mailer {
         require_once OI_MAIL_SMTP_PATH . 'includes/providers/class-oi-provider-brevo.php';
         require_once OI_MAIL_SMTP_PATH . 'includes/providers/class-oi-provider-postmark.php';
         require_once OI_MAIL_SMTP_PATH . 'includes/providers/class-oi-provider-resend.php';
+        require_once OI_MAIL_SMTP_PATH . 'includes/providers/class-oi-provider-ses.php';
         require_once OI_MAIL_SMTP_PATH . 'includes/providers/class-oi-provider-default.php';
 
         self::$providers = [
             'smtp'     => new OI_Provider_SMTP('smtp', 'Custom SMTP'),
             'gmail'    => new OI_Provider_SMTP('gmail', 'Gmail / Google Workspace'),
             'outlook'  => new OI_Provider_SMTP('outlook', 'Microsoft 365 / Outlook'),
+            'ses'      => new OI_Provider_SES(),
             'sendgrid' => new OI_Provider_SendGrid(),
             'mailgun'  => new OI_Provider_Mailgun(),
             'brevo'    => new OI_Provider_Brevo(),
@@ -149,35 +165,90 @@ class OI_Mailer {
             return $return;
         }
 
-        $mailer = $settings['mailer'] ?? 'smtp';
+        // 0. Offload to background queue if enabled and not already in direct queue dispatch
+        if (!self::$is_direct_dispatch && OI_Queue::is_enabled()) {
+            $queued = OI_Queue::enqueue($mail_args);
+            if ($queued) {
+                return true; // Short-circuit wp_mail immediately for zero latency!
+            }
+        }
+
+        // 1. Reroute All Outgoing Emails (FluentSMTP-inspired Staging feature)
+        if (!empty($settings['reroute_all_to']) && is_email($settings['reroute_all_to'])) {
+            $original_to = is_array($mail_args['to']) ? implode(', ', $mail_args['to']) : $mail_args['to'];
+            $mail_args['to'] = $settings['reroute_all_to'];
+            $mail_args['subject'] = '[Rerouted from: ' . $original_to . '] ' . ($mail_args['subject'] ?? '');
+        }
+
+        // 2. Email Simulation / Sandbox Staging Mode (FluentSMTP & Post-SMTP feature)
+        if (!empty($settings['enable_simulation_mode'])) {
+            $tracking_hash = OI_Tracker::generate_hash();
+            $log_id = OI_Logger::log([
+                'to'            => $mail_args['to'] ?? '',
+                'subject'       => ($mail_args['subject'] ?? '') . ' [Simulated]',
+                'message'       => $mail_args['message'] ?? '',
+                'headers'       => $mail_args['headers'] ?? [],
+                'attachments'   => $mail_args['attachments'] ?? [],
+                'mailer'        => 'simulation',
+                'status'        => 'sent',
+                'tracking_hash' => $tracking_hash,
+                'debug_log'     => 'Email Simulation / Staging Mode is ACTIVE. Message was logged successfully but not dispatched to external mail servers.',
+            ]);
+
+            if ($log_id && !empty($mail_args['attachments'])) {
+                OI_Attachments::archive($log_id, $mail_args['attachments']);
+            }
+
+            return true; // Short-circuit wp_mail: zero external email sent!
+        }
+
+        // Generate tracking hash & process message body
+        $tracking_hash = OI_Tracker::generate_hash();
+        self::$current_tracking_hash = $tracking_hash;
+
+        $message = $mail_args['message'] ?? '';
+        $processed_message = OI_Tracker::process_email_body($message, $tracking_hash);
+
+        $default_mailer = $settings['mailer'] ?? 'smtp';
+
+        // Evaluate Smart Conditional Routing
+        $mail_context = [
+            'to'          => $mail_args['to'] ?? '',
+            'subject'     => $mail_args['subject'] ?? '',
+            'from_email'  => self::filter_from_email($settings['from_email'] ?? ''),
+            'headers'     => $mail_args['headers'] ?? [],
+        ];
+        $mailer = OI_Routing::resolve_mailer($mail_context, $default_mailer);
 
         // Custom SMTP, Gmail, Outlook, Default are processed via PHPMailer
         if (in_array($mailer, ['smtp', 'gmail', 'outlook', 'default'], true)) {
+            $mail_args['message'] = $processed_message;
             self::$current_mail_data = $mail_args;
             self::$phpmailer_debug = [];
             return null; // Continue with normal PHPMailer flow
         }
 
-        // For API Providers (SendGrid, Mailgun, Brevo, Postmark, Resend)
+        // For API Providers (SendGrid, Mailgun, Brevo, Postmark, Resend, SES)
         $provider = self::get_provider($mailer);
         if (!$provider) {
             return null;
         }
 
         $mail_data = [
-            'to'          => $mail_args['to'] ?? '',
-            'subject'     => $mail_args['subject'] ?? '',
-            'message'     => $mail_args['message'] ?? '',
-            'headers'     => $mail_args['headers'] ?? [],
-            'attachments' => $mail_args['attachments'] ?? [],
-            'from_email'  => self::filter_from_email($settings['from_email'] ?? ''),
-            'from_name'   => self::filter_from_name($settings['from_name'] ?? ''),
+            'to'            => $mail_args['to'] ?? '',
+            'subject'       => $mail_args['subject'] ?? '',
+            'message'       => $processed_message,
+            'headers'       => $mail_args['headers'] ?? [],
+            'attachments'   => $mail_args['attachments'] ?? [],
+            'from_email'    => self::filter_from_email($settings['from_email'] ?? ''),
+            'from_name'     => self::filter_from_name($settings['from_name'] ?? ''),
+            'tracking_hash' => $tracking_hash,
         ];
 
         $result = $provider->send($mail_data, $settings);
 
         if ($result['success']) {
-            OI_Logger::log([
+            $log_id = OI_Logger::log([
                 'to'            => $mail_data['to'],
                 'subject'       => $mail_data['subject'],
                 'message'       => $mail_data['message'],
@@ -185,8 +256,13 @@ class OI_Mailer {
                 'attachments'   => $mail_data['attachments'],
                 'mailer'        => $mailer,
                 'status'        => 'sent',
+                'tracking_hash' => $tracking_hash,
                 'debug_log'     => $result['debug'] ?? '',
             ]);
+
+            if ($log_id && !empty($mail_data['attachments'])) {
+                OI_Attachments::archive($log_id, $mail_data['attachments']);
+            }
 
             return true;
         }
@@ -206,6 +282,7 @@ class OI_Mailer {
                         'attachments'   => $mail_data['attachments'],
                         'mailer'        => $fallback_mailer . ' (fallback)',
                         'status'        => 'sent',
+                        'tracking_hash' => $tracking_hash,
                         'debug_log'     => "Primary ($mailer) failed: " . $result['message'] . "\nSent via fallback: " . ($fallback_res['debug'] ?? ''),
                     ]);
                     return true;
@@ -222,9 +299,12 @@ class OI_Mailer {
             'attachments'   => $mail_data['attachments'],
             'mailer'        => $mailer,
             'status'        => 'failed',
+            'tracking_hash' => $tracking_hash,
             'error_message' => $result['message'] ?? 'Unknown API Error',
             'debug_log'     => $result['debug'] ?? '',
         ]);
+
+        self::trigger_failure_alert($result['message'] ?? 'API Error');
 
         return false;
     }
@@ -306,6 +386,11 @@ class OI_Mailer {
         if (!empty($settings['set_return_path']) && !empty($from_email)) {
             $phpmailer->Sender = $from_email;
         }
+
+        // Inject open and click tracking into PHPMailer Body if present
+        if (!empty(self::$current_tracking_hash) && !empty($phpmailer->Body)) {
+            $phpmailer->Body = OI_Tracker::process_email_body($phpmailer->Body, self::$current_tracking_hash);
+        }
     }
 
     /**
@@ -333,6 +418,159 @@ class OI_Mailer {
             'error_message' => $error_msg,
             'debug_log'     => implode("\n", self::$phpmailer_debug),
         ]);
+
+        self::trigger_failure_alert($error_msg);
+    }
+
+    /**
+     * Trigger failure alert transient & multi-channel notifications
+     *
+     * @param string $error_msg
+     */
+    public static function trigger_failure_alert($error_msg = '') {
+        $existing = get_transient('oi_email_failure_alert');
+        $count = ($existing && isset($existing['count'])) ? $existing['count'] + 1 : 1;
+
+        set_transient('oi_email_failure_alert', [
+            'count'     => $count,
+            'error'     => $error_msg,
+            'timestamp' => time(),
+        ], DAY_IN_SECONDS);
+
+        $settings = OI_Options::get_all(true);
+        if (empty($settings['enable_failure_alerts']) || get_transient('oi_failure_alert_throttled')) {
+            return;
+        }
+
+        $channels = !empty($settings['alert_channels']) ? (array)$settings['alert_channels'] : ['email'];
+        $site_name = get_option('blogname', 'WordPress Site');
+
+        foreach ($channels as $channel) {
+            self::dispatch_alert_to_channel($channel, $error_msg, $site_name, $settings, false);
+        }
+
+        // Throttle for 15 minutes to prevent alert storms
+        set_transient('oi_failure_alert_throttled', true, 15 * MINUTE_IN_SECONDS);
+    }
+
+    /**
+     * Dispatch alert to a specific channel (Email, Telegram, Slack, Discord)
+     *
+     * @param string $channel
+     * @param string $error_msg
+     * @param string $site_name
+     * @param array $settings
+     * @param bool $is_test
+     * @return array ['success' => bool, 'message' => string]
+     */
+    public static function dispatch_alert_to_channel($channel, $error_msg, $site_name, array $settings, $is_test = false) {
+        $logs_url = admin_url('admin.php?page=mail-smtp-by-oi-logs');
+        $prefix = $is_test ? __('[TEST ALERT]', 'mail-smtp-by-oi') : __('[URGENT ERROR]', 'mail-smtp-by-oi');
+
+        switch ($channel) {
+            case 'telegram':
+                $bot_token = trim($settings['telegram_bot_token'] ?? '');
+                $chat_id   = trim($settings['telegram_chat_id'] ?? '');
+                if (empty($bot_token) || empty($chat_id)) {
+                    return ['success' => false, 'message' => __('Telegram Bot Token or Chat ID is missing.', 'mail-smtp-by-oi')];
+                }
+
+                $msg  = "🚨 <b>" . esc_html($prefix) . " Mail SMTP by Oi Alert</b>\n\n";
+                $msg .= "<b>Website:</b> " . esc_html($site_name) . " (" . esc_url(home_url()) . ")\n";
+                $msg .= "<b>Message:</b> " . esc_html($error_msg) . "\n";
+                $msg .= "<b>Time:</b> " . esc_html(current_time('mysql')) . "\n\n";
+                $msg .= "👉 <a href=\"" . esc_url($logs_url) . "\">View Logs in WordPress Dashboard</a>";
+
+                $response = wp_remote_post("https://api.telegram.org/bot{$bot_token}/sendMessage", [
+                    'timeout' => 10,
+                    'headers' => ['Content-Type' => 'application/json'],
+                    'body'    => wp_json_encode([
+                        'chat_id'                  => $chat_id,
+                        'text'                     => $msg,
+                        'parse_mode'               => 'HTML',
+                        'disable_web_page_preview' => true,
+                    ]),
+                ]);
+
+                if (is_wp_error($response)) {
+                    return ['success' => false, 'message' => $response->get_error_message()];
+                }
+                $code = wp_remote_retrieve_response_code($response);
+                if ($code === 200) {
+                    return ['success' => true, 'message' => __('Telegram notification sent successfully.', 'mail-smtp-by-oi')];
+                }
+                $body = json_decode(wp_remote_retrieve_body($response), true);
+                return ['success' => false, 'message' => $body['description'] ?? sprintf(__('Telegram HTTP error: %d', 'mail-smtp-by-oi'), $code)];
+
+            case 'slack':
+                $webhook = trim($settings['slack_webhook_url'] ?? '');
+                if (empty($webhook)) {
+                    return ['success' => false, 'message' => __('Slack Webhook URL is missing.', 'mail-smtp-by-oi')];
+                }
+
+                $slack_payload = [
+                    'text' => sprintf("🚨 *%s WordPress Email Alert*\n*Site:* %s (%s)\n*Error:* `%s`\n<%s|Open Mail SMTP Logs>", $prefix, $site_name, home_url(), $error_msg, $logs_url),
+                ];
+
+                $response = wp_remote_post($webhook, [
+                    'timeout' => 10,
+                    'headers' => ['Content-Type' => 'application/json'],
+                    'body'    => wp_json_encode($slack_payload),
+                ]);
+
+                if (is_wp_error($response)) {
+                    return ['success' => false, 'message' => $response->get_error_message()];
+                }
+                $code = wp_remote_retrieve_response_code($response);
+                return ($code >= 200 && $code < 300)
+                    ? ['success' => true, 'message' => __('Slack notification sent successfully.', 'mail-smtp-by-oi')]
+                    : ['success' => false, 'message' => sprintf(__('Slack HTTP error: %d', 'mail-smtp-by-oi'), $code)];
+
+            case 'discord':
+                $webhook = trim($settings['discord_webhook_url'] ?? '');
+                if (empty($webhook)) {
+                    return ['success' => false, 'message' => __('Discord Webhook URL is missing.', 'mail-smtp-by-oi')];
+                }
+
+                $discord_payload = [
+                    'content' => sprintf("🚨 **%s WordPress Email Alert**\n**Site:** %s (<%s>)\n**Error:** `%s`\n[Open Mail SMTP Logs](<%s>)", $prefix, $site_name, home_url(), $error_msg, $logs_url),
+                ];
+
+                $response = wp_remote_post($webhook, [
+                    'timeout' => 10,
+                    'headers' => ['Content-Type' => 'application/json'],
+                    'body'    => wp_json_encode($discord_payload),
+                ]);
+
+                if (is_wp_error($response)) {
+                    return ['success' => false, 'message' => $response->get_error_message()];
+                }
+                $code = wp_remote_retrieve_response_code($response);
+                return ($code >= 200 && $code < 300)
+                    ? ['success' => true, 'message' => __('Discord notification sent successfully.', 'mail-smtp-by-oi')]
+                    : ['success' => false, 'message' => sprintf(__('Discord HTTP error: %d', 'mail-smtp-by-oi'), $code)];
+
+            case 'email':
+            default:
+                $alert_email = !empty($settings['failure_alert_email']) ? $settings['failure_alert_email'] : get_option('admin_email');
+                if (!is_email($alert_email)) {
+                    return ['success' => false, 'message' => __('Invalid alert recipient email address.', 'mail-smtp-by-oi')];
+                }
+
+                $sub = sprintf(__('%s Email Sending Alert on %s', 'mail-smtp-by-oi'), $prefix, $site_name);
+                $body = sprintf(
+                    __("Hello,\n\n%s from your WordPress website (%s):\n\nError Details:\n%s\n\nCheck logs in your WordPress dashboard:\n%s\n\nBest regards,\nMail SMTP by Oi", 'mail-smtp-by-oi'),
+                    $is_test ? 'This is a test notification' : 'An outgoing email failed to send',
+                    home_url(),
+                    $error_msg,
+                    $logs_url
+                );
+
+                $sent = @mail($alert_email, $sub, $body, 'From: no-reply@' . ($_SERVER['SERVER_NAME'] ?? 'localhost'));
+                return $sent
+                    ? ['success' => true, 'message' => sprintf(__('Alert email dispatched to %s.', 'mail-smtp-by-oi'), $alert_email)]
+                    : ['success' => false, 'message' => __('PHP mail() failed to dispatch alert.', 'mail-smtp-by-oi')];
+        }
     }
 
     /**
@@ -346,7 +584,7 @@ class OI_Mailer {
             return;
         }
 
-        OI_Logger::log([
+        $log_id = OI_Logger::log([
             'to'            => $mail_data['to'] ?? '',
             'subject'       => $mail_data['subject'] ?? '',
             'message'       => $mail_data['message'] ?? '',
@@ -354,8 +592,36 @@ class OI_Mailer {
             'attachments'   => $mail_data['attachments'] ?? [],
             'mailer'        => $settings['mailer'] ?? 'smtp',
             'status'        => 'sent',
+            'tracking_hash' => self::$current_tracking_hash,
             'debug_log'     => implode("\n", self::$phpmailer_debug),
         ]);
+
+        if ($log_id && !empty($mail_data['attachments'])) {
+            OI_Attachments::archive($log_id, $mail_data['attachments']);
+        }
+
+        self::$current_tracking_hash = null;
+    }
+
+    /**
+     * Dispatch email directly bypassing background queue
+     *
+     * @param array $mail_args
+     * @return bool
+     */
+    public static function dispatch_direct(array $mail_args) {
+        self::$is_direct_dispatch = true;
+
+        $result = wp_mail(
+            $mail_args['to'] ?? '',
+            $mail_args['subject'] ?? '',
+            $mail_args['message'] ?? '',
+            $mail_args['headers'] ?? [],
+            $mail_args['attachments'] ?? []
+        );
+
+        self::$is_direct_dispatch = false;
+        return (bool)$result;
     }
 
     /**

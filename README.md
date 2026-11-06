@@ -39,7 +39,7 @@
 
 ---
 
-## 📖 Why Mail SMTP by Oi? (কেন এই প্লাগইন?)
+## 📖 Why Mail SMTP by Oi?
 
 By default, WordPress attempts to send emails using the web server's native PHP `mail()` function. This causes critical business issues:
 - ❌ **No Authentication**: Emails lack SPF, DKIM, and DMARC alignment, causing Gmail, Yahoo, and Outlook to flag them as Spam or reject them completely.
@@ -54,10 +54,20 @@ By default, WordPress attempts to send emails using the web server's native PHP 
 | :--- | :---: | :---: | :---: |
 | **Delivery Reliability** | 🔴 Low (often Spam) | 🟡 Medium | 🟢 **100% In-Box Delivery** |
 | **Custom SMTP (cPanel/Postfix)** | ❌ No | 🟢 Yes | 🟢 **Yes (SSL/TLS/AutoTLS)** |
-| **Direct Cloud APIs (No Bloat)** | ❌ No | 🟡 Locked in Pro | 🟢 **SendGrid, Resend, Brevo, Mailgun, Postmark** |
+| **Direct Cloud APIs (No Bloat)** | ❌ No | 🟡 Locked in Pro | 🟢 **Amazon SES (SigV4), SendGrid, Resend, Brevo, Mailgun, Postmark** |
+| **Multi-Channel Alerts** | ❌ No | 🟡 Paid Add-on | 🟢 **Telegram, Slack, Discord, Email** |
 | **Full Email Logger** | ❌ No | 🟡 Paid Add-on | 🟢 **Built-in Free** |
 | **1-Click Email Resend** | ❌ No | 🟡 Paid Add-on | 🟢 **Built-in Free** |
+| **Async Background Queue (Zero Latency)** | ❌ No | 🔴 Pro / Locked | 🟢 **Built-in Free (Auto Retry)** |
+| **Smart Conditional Email Routing** | ❌ No | 🔴 Pro / Locked | 🟢 **Built-in Free (Subject/To/From Rules)** |
+| **Weekly Executive Summary Digest** | ❌ No | 🔴 Pro / Locked | 🟢 **Built-in Free (Scorecard & Metrics)** |
+| **Secure Attachment Vault** | ❌ No | 🔴 Pro / Locked | 🟢 **Built-in Free (.htaccess Protected)** |
+| **WordPress Core Email Controls** | ❌ No | 🔴 Pro / Locked | 🟢 **Built-in Free (Selective Suppression)** |
+| **Developer Staging & Simulation Mode** | ❌ No | 🔴 Pro / None | 🟢 **Built-in Free (Capture Without Sending)** |
+| **Admin Bar Live Health Node** | ❌ No | 🟡 Basic / Paid | 🟢 **Built-in Free (Top Bar Status)** |
+| **Open & Click Tracking** | ❌ No | 🔴 Pro / Locked | 🟢 **Built-in Free** |
 | **Live SMTP Handshake Terminal** | ❌ No | ❌ No | 🟢 **Real-time Live Debugger** |
+| **Dashboard Status Widget** | ❌ No | 🟡 Paid / Basic | 🟢 **Built-in Live Widget** |
 | **Outbound Port Diagnostic Scanner**| ❌ No | 🟡 Basic | 🟢 **Ports 587, 465, 2525, 25** |
 | **SPF & DMARC DNS Analyzer** | ❌ No | ❌ No | 🟢 **Built-in Free** |
 | **Credential Storage Security** | N/A | 🔴 Plain text in DB | 🟢 **OpenSSL AES-256-CBC Encrypted** |
@@ -67,10 +77,11 @@ By default, WordPress attempts to send emails using the web server's native PHP 
 
 ---
 
-## ✨ Key Features (মূল সুবিধাসমূহ)
+## ✨ Key Features
 
 ### 1. 🌐 Universal Mailer Support
 - **Custom SMTP**: Any standard SMTP host with port flexibility (587, 465, 2525, 25), SSL / TLS / STARTTLS, and SMTP authentication.
+- **Amazon SES (Simple Email Service)**: Direct AWS Signature Version 4 implementation via REST API. Ultra-fast, lowest cost ($0.10 per 1,000 emails), with zero external SDK bloat.
 - **Gmail / Google Workspace**: Instant preset for Gmail SMTP with App Passwords.
 - **Microsoft 365 / Outlook**: Instant preset for Outlook enterprise servers.
 - **SendGrid Web API v3**: Direct HTTPS API (bypasses hosting port blocks completely).
@@ -88,7 +99,73 @@ By default, WordPress attempts to send emails using the web server's native PHP 
 - **Auto-Cleanup Cron**: Automatically prunes logs older than 7, 14, 30, 60, or 90 days to keep your database lean.
 - **GDPR Privacy Mode**: Option to turn off body logging for sensitive user data.
 
-### 3. 🖥️ Live SMTP Handshake Terminal Debugger
+### 3. 📊 7-Day Delivery Activity Trend & CSV Export
+- **Daily Visual Bar Chart**: Clean CSS/SVG delivery trend in the dashboard showing Sent (Green) vs Failed (Red) emails for each of the last 7 days.
+- **Export to CSV**: Download filtered email delivery logs as CSV for auditing and client reporting.
+- **Sandboxed `<iframe>` Modal**: Inspect emails in an isolated iframe so custom email styling doesn't conflict with WordPress admin CSS.
+
+### 4. 📥 1-Click Migration from Other SMTP Plugins
+- Automatically detects settings from **WP Mail SMTP**, **FluentSMTP**, or **Easy WP SMTP** if installed on your site.
+- Migrates host, port, credentials, and from-email with a single click.
+
+### 5. 🔔 Multi-Channel Failure Alert System (Telegram, Slack, Discord, Email)
+- Get alerted immediately via **Telegram Bot**, **Slack Webhook**, **Discord Webhook**, or **Admin Email** if email delivery fails.
+- Catch expired passwords, blocked ports, or API quota limits before your customers report missed receipts or checkout errors.
+- Built-in 1-click test button to verify webhook notifications right from the settings screen.
+- Smart throttling (15 minutes) prevents notification floods during high-volume spikes.
+
+### 6. 📊 Native WordPress Dashboard Status Widget
+- Displays live delivery statistics right on the main WordPress admin dashboard.
+- Highlights 24-hour / all-time sent emails, failed emails, and overall delivery success rate (%).
+- Shows the currently active mailer (e.g. Amazon SES, SendGrid, Custom SMTP) and quick links to send test emails or view detailed logs.
+
+### 7. ⚡ Asynchronous Background Queue (Zero Latency)
+- Offloads email delivery to an asynchronous background worker and database queue table (`wp_oi_mail_smtp_queue`).
+- **Instant Checkout & Submissions**: WooCommerce orders and form submissions finish in milliseconds instead of hanging for 2-5 seconds waiting for SMTP handshakes.
+- **Smart Exponential Retry**: Automatically retries failed messages up to 3 times (2 min, 4 min intervals) before declaring permanent failure.
+
+### 8. 👁️ Email Open & Link Click Tracking
+- **Open Tracking**: Automatically injects a 1x1 transparent tracking pixel into outgoing HTML emails to measure recipient engagement without external services.
+- **Click Tracking**: Tracks recipient clicks on links within emails and seamlessly redirects them to their destinations.
+- **Log Table Badges**: Displays live "Opens" and "Clicks" badges in the email logs table and modal details view.
+
+### 9. 🔀 Smart Conditional Email Routing (Enterprise)
+- Directs specific emails to designated mailers based on dynamic conditions (Subject, From Email, To Email, or Headers).
+- **Match Operators**: `Contains`, `Equals`, `Starts With`, and `Ends With`.
+- **Use Cases**: Route mission-critical WooCommerce order receipts through Amazon SES, password resets through Postmark, and newsletters/marketing notifications through SendGrid or Brevo.
+
+### 10. 📈 Weekly Executive Email Summary Digest (Enterprise)
+- Automated executive email scorecard dispatched every Monday morning at 09:00 AM.
+- Provides site administrators with total sent emails, failure counts, delivery success rate (%), and recipient open/click rates.
+- Includes a 1-click "Send Test Weekly Digest" button to review the report layout at any time.
+
+### 11. 📎 Secure Email Attachment Vault & Resend / Forward (Enterprise)
+- **Protected Archival**: Safely archives copies of sent attachments (such as WooCommerce PDF receipts, licenses, or quotes) into an `.htaccess`-protected private directory.
+- **Direct Admin Downloads**: Administrators can inspect and re-download archived attachments directly from the Email Delivery Logs modal.
+- **Edit & Forward / Resend**: Forward logged emails to any custom recipient email address directly from the inspection modal with attachments preserved.
+- **Automatic Lifecycle Cleanup**: Attachments are automatically purged whenever corresponding email logs are cleared or pruned.
+
+### 12. 🛑 WordPress Core Automated Email Controls (Enterprise)
+- Selectively suppress noisy or unnecessary default WordPress automated notifications.
+- **Comment Controls**: Disable "Comment Awaiting Moderation" admin emails and "Comment Published" author emails.
+- **User & Admin Controls**: Disable "Password Changed" user alerts, "New User Registration" admin alerts, and "Site Admin Email Change" alerts.
+- **Core Update Controls**: Disable automatic core background update success notices.
+
+### 13. 🧪 Developer Staging & Email Simulation Mode
+- **Zero Accidental Sends**: Perfect for local and staging environments (`staging.domain.com` or `localhost`).
+- Captures all outgoing emails directly into the Email Delivery Log for inspection without dispatching them to real users.
+- **Catch-All Test Reroute**: Option to reroute 100% of outgoing site emails to a single development inbox.
+
+### 14. 🧭 WordPress Admin Bar Live Delivery Monitor
+- Real-time status node in the top WordPress admin bar across all administrative pages.
+- Displays active mailer state and highlights failed email counts immediately in red.
+- Quick dropdown shortcuts to view delivery logs, trigger test emails, and open settings.
+
+### 15. 👁️ Password Visibility Toggles & UX Polish
+- Instant show/hide toggle for SMTP passwords and API keys to avoid typing errors.
+- Tabbed email viewer: HTML Preview, Plain Text, Headers & Info, Attachments, Debug Trace, and Resend / Forward.
+
+### 16. 🖥️ Live SMTP Handshake Terminal Debugger
 - Real-time terminal box showing the exact socket connection and SMTP dialogue:
   - `EHLO` identification
   - `STARTTLS` negotiation and cipher selection
@@ -97,11 +174,11 @@ By default, WordPress attempts to send emails using the web server's native PHP 
   - Server completion codes (`250 2.0.0 OK`)
 - Instant 1-click "Copy Log" button for easy support and debugging.
 
-### 4. 🩺 Outbound Port Scanner & DNS Health Check
+### 17. 🩺 Outbound Port Scanner & DNS Health Check
 - **Port Scanner**: Tests outgoing connections to ports `587` (TLS), `465` (SSL), `2525`, and `25` to diagnose if your hosting firewall (e.g. GoDaddy, DigitalOcean, Hetzner, AWS) is blocking SMTP.
 - **DNS Inspector**: Checks if valid **SPF** and **DMARC** TXT records exist on your domain to prevent spoofing and ensure optimal deliverability.
 
-### 5. 🛡️ Enterprise-Grade Security
+### 18. 🛡️ Enterprise-Grade Security
 - All passwords and API keys are encrypted at rest using **AES-256-CBC** with keys derived from WordPress security salts (`AUTH_KEY` & `SECURE_AUTH_KEY`).
 - Complete nonce verification on all AJAX actions.
 - Strict capability checks (`manage_options`).
@@ -110,7 +187,7 @@ By default, WordPress attempts to send emails using the web server's native PHP 
 
 ---
 
-## 🔄 How It Works (আর্কিটেকচার)
+## 🔄 How It Works (Architecture)
 
 ```mermaid
 flowchart TD
@@ -155,6 +232,7 @@ Mail SMTP by Oi/
 │   ├── class-oi-encryption.php   # AES-256-CBC credential encryption
 │   ├── class-oi-mailer.php       # wp_mail dispatcher & hook interceptor
 │   ├── class-oi-logger.php       # Database logger, resend engine & cron pruner
+│   ├── class-oi-migration.php    # 1-Click migration from other SMTP plugins
 │   ├── class-oi-diagnostics.php  # Live port socket scanner & DNS checks
 │   ├── class-oi-admin.php        # Admin UI, tabs, navigation & AJAX endpoints
 │   │
@@ -179,22 +257,22 @@ Mail SMTP by Oi/
 
 ---
 
-## 🛠️ Installation & Quick Start (ইনস্টলেশন ও ব্যবহার)
+## 🛠️ Installation & Quick Start
 
-### ১. ইনস্টলেশন:
-1. `Mail SMTP by Oi` ফোল্ডারটি আপনার ওয়ার্ডপ্রেসের `wp-content/plugins/` ডিরেক্টরিতে আপলোড করুন অথবা অ্যাডমিন প্যানেল থেকে **Plugins -> Add New -> Upload Plugin** দিয়ে জিপ ফাইল আপলোড করুন।
-2. ওয়ার্ডপ্রেস ড্যাশবোর্ড থেকে **Plugins** মেনুতে যান এবং **Mail SMTP by Oi** প্লাগইনটি **Activate** করুন।
+### 1. Installation:
+1. Upload the `Mail SMTP by Oi` folder to your WordPress `wp-content/plugins/` directory, or upload the zip file from your WordPress admin dashboard (**Plugins -> Add New -> Upload Plugin**).
+2. Navigate to the **Plugins** menu in your WordPress dashboard and click **Activate** for **Mail SMTP by Oi**.
 
-### ২. কনফিগারেশন:
-1. বাম পাশের অ্যাডমিন মেনু থেকে **Mail SMTP**-তে ক্লিক করুন।
-2. **From Email** এবং **From Name** ফিল্ড পূরণ করুন। *(অন্যান্য প্লাগইন যেন ভুল ইমেইল দিয়ে না পাঠায় সেজন্য "Force From Email" চালু রাখা সুবিধাজনক)*।
-3. আপনার পছন্দের মেইলার (Custom SMTP, Gmail, SendGrid, Resend ইত্যাদি) সিলেক্ট করুন।
-4. প্রয়োজনীয় ক্রেডেনশিয়াল প্রদান করে **Save Settings** বাটনে ক্লিক করুন।
+### 2. Configuration:
+1. Click on **Mail SMTP** in the left admin sidebar menu.
+2. Fill in the **From Email** and **From Name** fields. *(Optionally enable "Force From Email" to prevent other plugins from overriding your sender identity)*.
+3. Select your preferred mailer (Amazon SES, Custom SMTP, Gmail, SendGrid, Resend, Brevo, Mailgun, or Postmark).
+4. Enter the required credentials and click **Save Configuration**.
 
-### ৩. টেস্ট ইমেইল ভেরিফিকেশন:
-1. **Send Test Email** ট্যাবে যান।
-2. আপনার নিজস্ব একটি ইমেইল অ্যাড্রেস দিয়ে **Send Test Email** বাটনে ক্লিক করুন।
-3. লাইভ টার্মিনাল উইন্ডোতে হ্যান্ডশেক ডিবাগ লগ দেখে ডেলিভারি কনফার্ম করুন।
+### 3. Test Email Verification:
+1. Switch to the **Test Email** tab.
+2. Enter your personal recipient email address and click **Send Test Email**.
+3. Inspect the live terminal output to verify socket connection and confirm successful delivery.
 
 <div align="right"><a href="#top">↑ back to top</a></div>
 
@@ -299,18 +377,18 @@ Clicking **Run Port Test** tests socket connections via `fsockopen` directly fro
 ## ❓ Frequently Asked Questions (FAQ)
 
 <details>
-<summary><strong>ইমেইল কি WooCommerce এবং Contact Form 7 এর সাথে কাজ করবে?</strong></summary>
-হ্যাঁ, 100% কাজ করবে। প্লাগইনটি ওয়ার্ডপ্রেসের কোর `wp_mail()` ফাংশনের সাথে ইন্টিগ্রেট করে। ফলে WooCommerce, Elementor Forms, Gravity Forms, WPForms, Fluent Forms কিংবা যেকোনো প্লাগইনের ইমেইল স্বয়ংক্রিয়ভাবে Mail SMTP by Oi দিয়ে যাবে।
+<summary><strong>Will this work with WooCommerce, Contact Form 7, and Elementor Forms?</strong></summary>
+Yes, 100% compatible. The plugin integrates directly with the WordPress core `wp_mail()` function. Emails sent by WooCommerce, Elementor Forms, Gravity Forms, WPForms, Fluent Forms, Contact Form 7, or any standard WordPress plugin will automatically route through Mail SMTP by Oi.
 </details>
 
 <details>
-<summary><strong>হোস্টিং যদি SMTP পোর্ট ব্লক করে রাখে তাহলে কী করব?</strong></summary>
-আপনার হোস্টিং প্রোভাইডার যদি পোর্ট 587/465 ব্লক করে রাখে, আপনি **SendGrid**, **Brevo**, **Postmark**, বা **Resend** এর মতো **HTTP REST API** মেইলার ব্যবহার করতে পারেন। API মেইলারগুলো সাধারণ HTTPS (Port 443) দিয়ে কাজ করে, যা কোনো হোস্টিংয়েই ব্লক থাকে না।
+<summary><strong>What should I do if my web hosting blocks outbound SMTP ports?</strong></summary>
+If your hosting provider blocks ports 587 and 465, use an HTTP REST API mailer such as **Amazon SES**, **SendGrid**, **Brevo**, **Postmark**, or **Resend**. API mailers communicate over standard HTTPS (Port 443), which is never blocked by hosting firewalls.
 </details>
 
 <details>
-<summary><strong>ইমেইল লগ কতদিন পর ডিলিট হবে?</strong></summary>
-সেটিংসের **Log Retention Period** থেকে আপনি ৭, ১৪, ৩০, ৬০, ৯০ দিন নির্বাচন করতে পারেন অথবা আজীবন সংরক্ষণ করতে পারেন। ডিফল্টভাবে ৩০ দিন পর পুরোনো লগ স্বয়ংক্রিয়ভাবে মুছে যায়।
+<summary><strong>How long are email logs retained in the database?</strong></summary>
+You can configure the **Log Retention Period** in Settings to automatically purge logs after 7, 14, 30, 60, or 90 days, or choose to keep them forever. By default, logs older than 30 days are automatically cleaned up daily to keep your database lean.
 </details>
 
 <div align="right"><a href="#top">↑ back to top</a></div>

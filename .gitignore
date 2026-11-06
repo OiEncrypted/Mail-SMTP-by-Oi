@@ -5,3 +5,7 @@ node_modules/
 vendor/
 .idea/
 .vscode/
+
+# Ignore sample reference plugins folder
+sample/
+sample/*

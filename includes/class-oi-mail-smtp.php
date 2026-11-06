@@ -44,9 +44,16 @@ class OI_Mail_SMTP {
         require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-options.php';
         require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-logger.php';
         require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-diagnostics.php';
+        require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-tracker.php';
+        require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-queue.php';
+        require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-routing.php';
+        require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-attachments.php';
+        require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-digest.php';
+        require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-controls.php';
         require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-mailer.php';
 
         if (is_admin()) {
+            require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-migration.php';
             require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-admin.php';
         }
     }
@@ -57,6 +64,15 @@ class OI_Mail_SMTP {
     private function init_hooks() {
         // Load textdomain
         add_action('init', [$this, 'load_textdomain']);
+
+        // Initialize Tracker, Queue, and Digest
+        OI_Tracker::init();
+        OI_Queue::init();
+        OI_Digest::init();
+        OI_Controls::init();
+
+        // Secure attachment download endpoint
+        add_action('admin_post_oi_download_attachment', ['OI_Attachments', 'handle_download']);
 
         // Initialize mailer
         OI_Mailer::init();
@@ -88,9 +104,17 @@ class OI_Mail_SMTP {
         require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-logger.php';
         OI_Logger::create_table();
 
+        require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-queue.php';
+        OI_Queue::create_table();
+
         // Schedule daily cleanup cron if not scheduled
         if (!wp_next_scheduled('oi_mail_smtp_cleanup_logs')) {
             wp_schedule_event(time(), 'daily', 'oi_mail_smtp_cleanup_logs');
+        }
+
+        // Schedule queue runner cron if not scheduled
+        if (!wp_next_scheduled('oi_mail_smtp_process_queue_cron')) {
+            wp_schedule_event(time(), 'oi_every_two_minutes', 'oi_mail_smtp_process_queue_cron');
         }
     }
 
@@ -98,10 +122,20 @@ class OI_Mail_SMTP {
      * Plugin deactivation handler
      */
     public static function deactivate() {
-        // Clear scheduled cron
+        // Clear scheduled crons
         $timestamp = wp_next_scheduled('oi_mail_smtp_cleanup_logs');
         if ($timestamp) {
             wp_unschedule_event($timestamp, 'oi_mail_smtp_cleanup_logs');
+        }
+
+        $queue_timestamp = wp_next_scheduled('oi_mail_smtp_process_queue_cron');
+        if ($queue_timestamp) {
+            wp_unschedule_event($queue_timestamp, 'oi_mail_smtp_process_queue_cron');
+        }
+
+        $digest_timestamp = wp_next_scheduled('oi_mail_smtp_weekly_digest_cron');
+        if ($digest_timestamp) {
+            wp_unschedule_event($digest_timestamp, 'oi_mail_smtp_weekly_digest_cron');
         }
     }
 }
