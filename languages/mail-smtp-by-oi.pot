@@ -1,0 +1,68 @@
+# Copyright (C) 2026 Oi Technologies
+# This file is distributed under the GPLv3 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Mail SMTP by Oi 1.0.0\n"
+"Report-Msgid-Bugs-To: https://oitech.com.bd/\n"
+"POT-Creation-Date: 2026-11-07 00:00:00+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2026-YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Oi Technologies <support@oitech.com.bd>\n"
+"Language-Team: Oi Technologies <support@oitech.com.bd>\n"
+"X-Generator: Mail SMTP by Oi\n"
+"X-Domain: mail-smtp-by-oi\n"
+
+#: mail-smtp-by-oi.php
+msgid "Mail SMTP by Oi"
+msgstr ""
+
+#: includes/class-oi-admin.php
+msgid "General Email Configuration"
+msgstr ""
+
+#: includes/class-oi-admin.php
+msgid "Sender Identity"
+msgstr ""
+
+#: includes/class-oi-admin.php
+msgid "From Email"
+msgstr ""
+
+#: includes/class-oi-admin.php
+msgid "From Name"
+msgstr ""
+
+#: includes/class-oi-admin.php
+msgid "Choose Mail Service Provider"
+msgstr ""
+
+#: includes/class-oi-admin.php
+msgid "Send a Test Email"
+msgstr ""
+
+#: includes/class-oi-admin.php
+msgid "Email Delivery Logs"
+msgstr ""
+
+#: includes/class-oi-admin.php
+msgid "Domain Deliverability & Spam Protection Check"
+msgstr ""
+
+#: includes/class-oi-admin.php
+msgid "Server Diagnostics & Connectivity"
+msgstr ""
+
+#: includes/class-oi-admin.php
+msgid "Tools & Migration"
+msgstr ""
+
+#: includes/class-oi-admin.php
+msgid "Saved & Encrypted"
+msgstr ""
+
+#: includes/class-oi-admin.php
+msgid "Settings saved successfully!"
+msgstr ""
+

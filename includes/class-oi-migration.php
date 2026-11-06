@@ -47,6 +47,16 @@ class OI_Migration {
             ];
         }
 
+        // 4. Post SMTP (Postman)
+        $post_smtp = get_option('postman_options', false);
+        if (!empty($post_smtp) && is_array($post_smtp)) {
+            $detected['post_smtp'] = [
+                'name'        => 'Post SMTP',
+                'description' => __('Found existing Post SMTP (Postman) configuration.', 'mail-smtp-by-oi'),
+                'mailer'      => !empty($post_smtp['transport_type']) ? $post_smtp['transport_type'] : 'smtp',
+            ];
+        }
+
         return $detected;
     }
 
@@ -144,6 +154,29 @@ class OI_Migration {
                     $imported['smtp_pass']       = $s['smtp_password'] ?? '';
                     $imported['smtp_auth']       = !empty($s['autentication']);
                 }
+                break;
+
+            case 'post_smtp':
+                $opts = get_option('postman_options', []);
+                if (empty($opts)) {
+                    return ['success' => false, 'message' => __('No settings found for Post SMTP.', 'mail-smtp-by-oi')];
+                }
+
+                $imported['from_email'] = $opts['sender_email'] ?? '';
+                $imported['from_name']  = $opts['sender_name'] ?? '';
+                $imported['force_from_email'] = !empty($opts['prevent_sender_email_override']);
+                $imported['force_from_name']  = !empty($opts['prevent_sender_name_override']);
+
+                $transport = $opts['transport_type'] ?? 'smtp';
+                $imported['mailer'] = self::map_mailer_key($transport);
+
+                $imported['smtp_host']       = $opts['hostname'] ?? '';
+                $imported['smtp_port']       = $opts['port'] ?? 587;
+                $enc = strtolower($opts['enc_type'] ?? 'tls');
+                $imported['smtp_encryption'] = in_array($enc, ['ssl', 'tls', 'none'], true) ? $enc : 'tls';
+                $imported['smtp_user']       = $opts['basic_auth_username'] ?? '';
+                $imported['smtp_pass']       = $opts['basic_auth_password'] ?? '';
+                $imported['smtp_auth']       = !empty($opts['auth_type']) && $opts['auth_type'] !== 'none';
                 break;
 
             default:
