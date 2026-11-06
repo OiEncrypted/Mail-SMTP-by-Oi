@@ -320,6 +320,7 @@
 
                     // 3. Headers & Meta
                     var metaHtml = '<div><strong>To:</strong> ' + log.to + '</div>';
+                    metaHtml += '<div><strong>Source:</strong> <span class="oi-source-badge">' + (log.source || 'WordPress Core') + '</span></div>';
                     metaHtml += '<div><strong>Status:</strong> ' + (log.status === 'sent' ? '<span class="oi-badge oi-badge-sent">Sent</span>' : '<span class="oi-badge oi-badge-failed">Failed</span>') + '</div>';
                     metaHtml += '<div><strong>Mailer:</strong> <code>' + log.mailer + '</code></div>';
                     metaHtml += '<div><strong>Date:</strong> ' + log.date + '</div>';

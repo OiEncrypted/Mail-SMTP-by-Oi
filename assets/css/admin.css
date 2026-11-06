@@ -1577,6 +1577,19 @@ input:checked + .oi-slider:before {
     border: 1px solid #a7f3d0;
 }
 
+.oi-source-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: #475569;
+    background: #f1f5f9;
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    line-height: 1.4;
+}
+
 .oi-key-badge-saved .dashicons {
     font-size: 13px;
     width: 13px;

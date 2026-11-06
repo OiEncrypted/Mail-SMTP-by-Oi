@@ -36,6 +36,7 @@ class OI_Logger {
             headers text NULL,
             attachments text NULL,
             mailer varchar(50) NOT NULL DEFAULT 'smtp',
+            source varchar(100) NULL DEFAULT 'WordPress Core',
             status varchar(20) NOT NULL DEFAULT 'sent',
             error_message text NULL,
             debug_log longtext NULL,
@@ -53,6 +54,62 @@ class OI_Logger {
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta($sql);
+
+        // Self-heal table schema if source column is missing in existing installations
+        $col = $wpdb->get_results($wpdb->prepare("SHOW COLUMNS FROM $table_name LIKE %s", 'source'));
+        if (empty($col)) {
+            $wpdb->query("ALTER TABLE $table_name ADD COLUMN source varchar(100) NULL DEFAULT 'WordPress Core' AFTER mailer");
+        }
+    }
+
+    /**
+     * Detect calling plugin or system source for email
+     *
+     * @return string
+     */
+    public static function detect_source() {
+        if (!function_exists('debug_backtrace')) {
+            return 'WordPress Core';
+        }
+
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 15);
+        foreach ($trace as $step) {
+            $file = isset($step['file']) ? str_replace('\\', '/', $step['file']) : '';
+            if (empty($file)) continue;
+
+            if (strpos($file, '/woocommerce/') !== false) {
+                return 'WooCommerce';
+            }
+            if (strpos($file, '/contact-form-7/') !== false) {
+                return 'Contact Form 7';
+            }
+            if (strpos($file, '/wpforms') !== false) {
+                return 'WPForms';
+            }
+            if (strpos($file, '/gravityforms/') !== false) {
+                return 'Gravity Forms';
+            }
+            if (strpos($file, '/fluentform/') !== false) {
+                return 'Fluent Forms';
+            }
+            if (strpos($file, '/elementor') !== false) {
+                return 'Elementor Forms';
+            }
+            if (strpos($file, '/formidable/') !== false) {
+                return 'Formidable Forms';
+            }
+            if (strpos($file, '/ninja-forms/') !== false) {
+                return 'Ninja Forms';
+            }
+            if (strpos($file, '/wordfence/') !== false) {
+                return 'Wordfence';
+            }
+            if (strpos($file, 'wp-login.php') !== false) {
+                return 'Password Reset / Auth';
+            }
+        }
+
+        return 'WordPress Core';
     }
 
     /**
@@ -93,6 +150,7 @@ class OI_Logger {
             'headers'       => $headers_str,
             'attachments'   => $attachments_str,
             'mailer'        => sanitize_key($data['mailer'] ?? 'smtp'),
+            'source'        => !empty($data['source']) ? sanitize_text_field($data['source']) : self::detect_source(),
             'status'        => ($data['status'] ?? 'sent') === 'sent' ? 'sent' : 'failed',
             'error_message' => !empty($data['error_message']) ? sanitize_text_field($data['error_message']) : null,
             'debug_log'     => !empty($data['debug_log']) ? $data['debug_log'] : null,
@@ -160,7 +218,7 @@ class OI_Logger {
         }
 
         // Query items
-        $query_sql = "SELECT id, to_email, subject, mailer, status, error_message, created_at FROM $table WHERE $where_clause ORDER BY $order_by $order_dir LIMIT %d OFFSET %d";
+        $query_sql = "SELECT id, to_email, subject, mailer, source, status, attachments, open_count, click_count, last_opened_at, last_clicked_at, error_message, created_at FROM $table WHERE $where_clause ORDER BY $order_by $order_dir LIMIT %d OFFSET %d";
         $values[] = $per_page;
         $values[] = $offset;
 

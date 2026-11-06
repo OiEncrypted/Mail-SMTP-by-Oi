@@ -108,6 +108,7 @@ class OI_Diagnostics {
         }
 
         $spf_result = ['found' => false, 'record' => '', 'status' => 'warning', 'tip' => ''];
+        $dkim_result = ['found' => false, 'record' => '', 'selector' => '', 'status' => 'warning', 'tip' => ''];
         $dmarc_result = ['found' => false, 'record' => '', 'status' => 'warning', 'tip' => ''];
 
         if (function_exists('dns_get_record')) {
@@ -130,6 +131,30 @@ class OI_Diagnostics {
                 $spf_result['tip'] = sprintf(__('No SPF record found for %s. Adding an SPF TXT record improves email deliverability and prevents spoofing.', 'mail-smtp-by-oi'), esc_html($domain));
             }
 
+            // Check DKIM across common selectors
+            $common_selectors = ['default', 'google', 'k1', 'mail', 's1', 'smtp', 'mandrill', 'resend', 'postmark', 'brevo', 'ses'];
+            foreach ($common_selectors as $sel) {
+                $dkim_host = $sel . '._domainkey.' . $domain;
+                $dkim_records = @dns_get_record($dkim_host, DNS_TXT);
+                if (is_array($dkim_records)) {
+                    foreach ($dkim_records as $rec) {
+                        $txt = $rec['txt'] ?? ($rec['entries'][0] ?? '');
+                        if (stripos($txt, 'v=DKIM1') !== false || stripos($txt, 'k=rsa') !== false || stripos($txt, 'p=') !== false) {
+                            $dkim_result['found'] = true;
+                            $dkim_result['record'] = $txt;
+                            $dkim_result['selector'] = $sel;
+                            $dkim_result['status'] = 'pass';
+                            $dkim_result['tip'] = sprintf(__('Valid DKIM record detected on selector "%s".', 'mail-smtp-by-oi'), esc_html($sel));
+                            break 2;
+                        }
+                    }
+                }
+            }
+
+            if (!$dkim_result['found']) {
+                $dkim_result['tip'] = sprintf(__('No common DKIM selector detected for %s. If your mail provider uses a custom selector, verify it in their dashboard.', 'mail-smtp-by-oi'), esc_html($domain));
+            }
+
             // Check DMARC
             $dmarc_records = @dns_get_record('_dmarc.' . $domain, DNS_TXT);
             if (is_array($dmarc_records)) {
@@ -150,12 +175,14 @@ class OI_Diagnostics {
             }
         } else {
             $spf_result['tip'] = __('dns_get_record() is disabled on this server.', 'mail-smtp-by-oi');
+            $dkim_result['tip'] = __('dns_get_record() is disabled on this server.', 'mail-smtp-by-oi');
             $dmarc_result['tip'] = __('dns_get_record() is disabled on this server.', 'mail-smtp-by-oi');
         }
 
         return [
             'domain' => $domain,
             'spf'    => $spf_result,
+            'dkim'   => $dkim_result,
             'dmarc'  => $dmarc_result,
         ];
     }

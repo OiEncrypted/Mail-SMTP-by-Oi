@@ -369,7 +369,7 @@ class OI_Admin {
                 </div>
                 <div class="oi-modal-body" id="oi-modal-content">
                     <div id="oi-tab-preview" class="oi-modal-pane active">
-                        <iframe id="oi-modal-iframe" class="oi-modal-iframe" sandbox="allow-same-origin"></iframe>
+                        <iframe id="oi-modal-iframe" class="oi-modal-iframe" sandbox="allow-popups"></iframe>
                     </div>
                     <div id="oi-tab-raw" class="oi-modal-pane">
                         <pre id="oi-modal-raw-body" class="oi-modal-raw"></pre>
@@ -1323,10 +1323,13 @@ class OI_Admin {
                                     </td>
                                     <td><strong><?php echo esc_html($row['to_email']); ?></strong></td>
                                     <td>
-                                        <?php echo esc_html($row['subject']); ?>
-                                        <?php if (!empty($row['attachments'])) : ?>
-                                            <span class="dashicons dashicons-paperclip" title="<?php esc_attr_e('Has attachments', 'mail-smtp-by-oi'); ?>" style="font-size:14px; width:14px; height:14px; color:#4f46e5; vertical-align:middle; margin-left:6px;"></span>
-                                        <?php endif; ?>
+                                        <div style="font-weight:600; color:#1e293b;"><?php echo esc_html($row['subject']); ?></div>
+                                        <div style="margin-top:4px; display:flex; align-items:center; gap:6px;">
+                                            <span class="oi-source-badge"><?php echo esc_html($row['source'] ?? 'WordPress Core'); ?></span>
+                                            <?php if (!empty($row['attachments'])) : ?>
+                                                <span class="dashicons dashicons-paperclip" title="<?php esc_attr_e('Has attachments', 'mail-smtp-by-oi'); ?>" style="font-size:14px; width:14px; height:14px; color:#4f46e5; vertical-align:middle;"></span>
+                                            <?php endif; ?>
+                                        </div>
                                     </td>
                                     <td>
                                         <?php if (!empty($row['open_count'])) : ?>
@@ -1468,7 +1471,7 @@ class OI_Admin {
                     </div>
                 </div>
 
-                <div class="oi-grid-2" style="margin-top:12px;">
+                <div class="oi-grid-3" style="margin-top:12px;">
                     <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:14px 16px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                             <strong><?php esc_html_e('SPF Record', 'mail-smtp-by-oi'); ?></strong>
@@ -1479,6 +1482,19 @@ class OI_Admin {
                         <p style="font-size:12px; color:#64748b; margin:0;"><?php echo esc_html($from_domain_dns['spf']['tip']); ?></p>
                         <?php if ($from_domain_dns['spf']['found']) : ?>
                             <code style="font-size:11px; display:block; margin-top:6px; word-break:break-all;"><?php echo esc_html($from_domain_dns['spf']['record']); ?></code>
+                        <?php endif; ?>
+                    </div>
+
+                    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:14px 16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                            <strong><?php esc_html_e('DKIM Record', 'mail-smtp-by-oi'); ?></strong>
+                            <span class="oi-badge <?php echo $from_domain_dns['dkim']['found'] ? 'oi-badge-sent' : 'oi-badge-failed'; ?>">
+                                <?php echo $from_domain_dns['dkim']['found'] ? '✔ PASS' : '✖ OPTIONAL'; ?>
+                            </span>
+                        </div>
+                        <p style="font-size:12px; color:#64748b; margin:0;"><?php echo esc_html($from_domain_dns['dkim']['tip']); ?></p>
+                        <?php if ($from_domain_dns['dkim']['found']) : ?>
+                            <code style="font-size:11px; display:block; margin-top:6px; word-break:break-all;"><?php echo esc_html($from_domain_dns['dkim']['record']); ?></code>
                         <?php endif; ?>
                     </div>
 
@@ -1561,6 +1577,17 @@ class OI_Admin {
                         <strong><?php esc_html_e('SPF Record for', 'mail-smtp-by-oi'); ?> <?php echo esc_html($dns['domain']); ?>:</strong>
                         <div class="oi-dns-val"><?php echo $dns['spf']['found'] ? esc_html($dns['spf']['record']) : esc_html__('No record found.', 'mail-smtp-by-oi'); ?></div>
                         <p class="oi-help"><?php echo esc_html($dns['spf']['tip']); ?></p>
+                    </div>
+                </div>
+
+                <div class="oi-dns-row" style="margin-top:16px;">
+                    <div class="oi-dns-badge <?php echo $dns['dkim']['found'] ? 'oi-dns-pass' : 'oi-dns-warn'; ?>">
+                        DKIM
+                    </div>
+                    <div class="oi-dns-info">
+                        <strong><?php esc_html_e('DKIM Record for', 'mail-smtp-by-oi'); ?> <?php echo esc_html($dns['domain']); ?>:</strong>
+                        <div class="oi-dns-val"><?php echo $dns['dkim']['found'] ? esc_html($dns['dkim']['record']) : esc_html__('No standard selector record detected.', 'mail-smtp-by-oi'); ?></div>
+                        <p class="oi-help"><?php echo esc_html($dns['dkim']['tip']); ?></p>
                     </div>
                 </div>
 
@@ -1778,6 +1805,7 @@ class OI_Admin {
                 'attachments'       => esc_html($log['attachments']),
                 'vault_attachments' => $vault_attachments,
                 'mailer'            => esc_html(strtoupper($log['mailer'])),
+                'source'            => esc_html($log['source'] ?? 'WordPress Core'),
                 'status'            => esc_html($log['status']),
                 'error_message'     => esc_html($log['error_message'] ?? ''),
                 'debug_log'         => esc_html($log['debug_log'] ?? ''),
