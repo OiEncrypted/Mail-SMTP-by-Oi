@@ -18,7 +18,7 @@ class OI_Provider_Brevo implements OI_Provider_Interface {
     }
 
     public function send(array $mail_data, array $settings) {
-        $api_key = $settings['api_key'] ?? '';
+        $api_key = !empty($settings['brevo_api_key']) ? $settings['brevo_api_key'] : ($settings['api_key'] ?? '');
         if (empty($api_key)) {
             return [
                 'success' => false,

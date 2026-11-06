@@ -49,8 +49,13 @@ class OI_Options {
             'smtp_pass'          => '',
             'smtp_timeout'       => 20,
 
-            // API Providers
+            // API Providers (Dedicated Keys to prevent cross-provider collision)
             'api_key'            => '',
+            'sendgrid_api_key'   => '',
+            'brevo_api_key'      => '',
+            'postmark_api_key'   => '',
+            'resend_api_key'     => '',
+            'smtp2go_api_key'    => '',
             'mailgun_api_key'    => '',
             'mailgun_domain'     => '',
             'mailgun_region'     => 'us', // 'us', 'eu'
@@ -113,7 +118,19 @@ class OI_Options {
         $settings = self::$settings;
 
         if ($decrypt) {
-            $sensitive_keys = ['smtp_pass', 'api_key', 'mailgun_api_key', 'ses_access_key', 'ses_secret_key', 'telegram_bot_token'];
+            $sensitive_keys = [
+                'smtp_pass',
+                'api_key',
+                'sendgrid_api_key',
+                'brevo_api_key',
+                'postmark_api_key',
+                'resend_api_key',
+                'smtp2go_api_key',
+                'mailgun_api_key',
+                'ses_access_key',
+                'ses_secret_key',
+                'telegram_bot_token',
+            ];
             foreach ($sensitive_keys as $key) {
                 if (!empty($settings[$key])) {
                     $settings[$key] = OI_Encryption::decrypt($settings[$key]);
@@ -166,7 +183,7 @@ class OI_Options {
         $cleaned['enable_queue']          = !empty($raw_data['enable_queue']);
 
         // Text & Select fields
-        $cleaned['mailer'] = in_array($raw_data['mailer'] ?? '', ['smtp', 'gmail', 'outlook', 'sendgrid', 'mailgun', 'brevo', 'postmark', 'resend', 'ses', 'default'], true)
+        $cleaned['mailer'] = in_array($raw_data['mailer'] ?? '', ['smtp', 'gmail', 'outlook', 'sendgrid', 'mailgun', 'brevo', 'postmark', 'resend', 'ses', 'smtp2go', 'default'], true)
             ? $raw_data['mailer'] : 'smtp';
 
         $cleaned['from_email'] = !empty($raw_data['from_email']) ? sanitize_email($raw_data['from_email']) : $defaults['from_email'];
@@ -192,11 +209,21 @@ class OI_Options {
             $cleaned['smtp_pass'] = !empty($raw_current['smtp_pass']) ? $raw_current['smtp_pass'] : '';
         }
 
-        // API Key handling
+        // Generic API Key handling (legacy fallback)
         if (isset($raw_data['api_key']) && trim($raw_data['api_key']) !== '' && !in_array(trim($raw_data['api_key']), $masked_placeholders, true)) {
             $cleaned['api_key'] = OI_Encryption::encrypt(trim($raw_data['api_key']));
         } else {
             $cleaned['api_key'] = !empty($raw_current['api_key']) ? $raw_current['api_key'] : '';
+        }
+
+        // Dedicated API Keys per provider (avoids cross-provider setting collisions)
+        $provider_keys = ['sendgrid_api_key', 'brevo_api_key', 'postmark_api_key', 'resend_api_key', 'smtp2go_api_key'];
+        foreach ($provider_keys as $pkey) {
+            if (isset($raw_data[$pkey]) && trim($raw_data[$pkey]) !== '' && !in_array(trim($raw_data[$pkey]), $masked_placeholders, true)) {
+                $cleaned[$pkey] = OI_Encryption::encrypt(trim($raw_data[$pkey]));
+            } else {
+                $cleaned[$pkey] = !empty($raw_current[$pkey]) ? $raw_current[$pkey] : '';
+            }
         }
 
         // Mailgun specifics

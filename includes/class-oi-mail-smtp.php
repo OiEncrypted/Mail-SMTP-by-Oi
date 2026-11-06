@@ -50,7 +50,13 @@ class OI_Mail_SMTP {
         require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-attachments.php';
         require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-digest.php';
         require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-controls.php';
+        require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-privacy.php';
+        require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-site-health.php';
         require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-mailer.php';
+
+        if (defined('WP_CLI') && WP_CLI) {
+            require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-cli.php';
+        }
 
         if (is_admin()) {
             require_once OI_MAIL_SMTP_PATH . 'includes/class-oi-migration.php';
@@ -70,6 +76,13 @@ class OI_Mail_SMTP {
         OI_Queue::init();
         OI_Digest::init();
         OI_Controls::init();
+        OI_Privacy::init();
+        OI_Site_Health::init();
+
+        // Register WP-CLI commands if running in CLI
+        if (defined('WP_CLI') && WP_CLI) {
+            WP_CLI::add_command('oi-smtp', 'OI_CLI');
+        }
 
         // Secure attachment download endpoint
         add_action('admin_post_oi_download_attachment', ['OI_Attachments', 'handle_download']);

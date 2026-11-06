@@ -78,6 +78,7 @@ class OI_Mailer {
         require_once OI_MAIL_SMTP_PATH . 'includes/providers/class-oi-provider-brevo.php';
         require_once OI_MAIL_SMTP_PATH . 'includes/providers/class-oi-provider-postmark.php';
         require_once OI_MAIL_SMTP_PATH . 'includes/providers/class-oi-provider-resend.php';
+        require_once OI_MAIL_SMTP_PATH . 'includes/providers/class-oi-provider-smtp2go.php';
         require_once OI_MAIL_SMTP_PATH . 'includes/providers/class-oi-provider-ses.php';
         require_once OI_MAIL_SMTP_PATH . 'includes/providers/class-oi-provider-default.php';
 
@@ -91,6 +92,7 @@ class OI_Mailer {
             'brevo'    => new OI_Provider_Brevo(),
             'postmark' => new OI_Provider_Postmark(),
             'resend'   => new OI_Provider_Resend(),
+            'smtp2go'  => new OI_Provider_SMTP2GO(),
             'default'  => new OI_Provider_Default(),
         ];
     }

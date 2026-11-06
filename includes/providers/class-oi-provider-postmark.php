@@ -18,7 +18,7 @@ class OI_Provider_Postmark implements OI_Provider_Interface {
     }
 
     public function send(array $mail_data, array $settings) {
-        $api_key = $settings['api_key'] ?? '';
+        $api_key = !empty($settings['postmark_api_key']) ? $settings['postmark_api_key'] : ($settings['api_key'] ?? '');
         if (empty($api_key)) {
             return [
                 'success' => false,

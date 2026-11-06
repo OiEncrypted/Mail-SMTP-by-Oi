@@ -135,6 +135,11 @@ class OI_Queue {
      * AJAX handler for async background worker
      */
     public static function ajax_process_queue() {
+        $nonce = isset($_REQUEST['_oi_nonce']) ? sanitize_text_field(wp_unslash($_REQUEST['_oi_nonce'])) : '';
+        if (!wp_verify_nonce($nonce, 'oi_queue_worker') && !current_user_can('manage_options')) {
+            wp_die(esc_html__('Unauthorized queue runner access.', 'mail-smtp-by-oi'), 403);
+        }
+
         // Fast processing in background
         if (function_exists('fastcgi_finish_request')) {
             fastcgi_finish_request();

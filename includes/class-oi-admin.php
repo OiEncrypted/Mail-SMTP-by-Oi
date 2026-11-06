@@ -194,6 +194,8 @@ class OI_Admin {
                 return '<svg width="26" height="26" viewBox="0 0 24 24"><rect width="24" height="24" rx="4" fill="#1A1F2C"/><path d="M4 6h16v12H4z" fill="#FFDE00"/><path d="M4 6l8 6 8-6" stroke="#1A1F2C" stroke-width="2" fill="none"/></svg>';
             case 'ses':
                 return '<svg width="28" height="28" viewBox="0 0 24 24" fill="#FF9900"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>';
+            case 'smtp2go':
+                return '<svg width="26" height="26" viewBox="0 0 24 24" fill="#1bb76e"><circle cx="12" cy="12" r="10" fill="#1bb76e"/><path d="M7 12l3.5 3.5 6.5-6.5" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
             case 'resend':
                 return '<svg width="26" height="26" viewBox="0 0 24 24" fill="#000000"><path d="M2 4h20v16H2V4zm2 2v1.5l8 5 8-5V6H4zm16 12V9.5l-8 5-8-5V18h16z"/></svg>';
             case 'default':
@@ -533,6 +535,7 @@ class OI_Admin {
                     'gmail'    => ['name' => 'Google / Gmail', 'desc' => 'Send via Gmail / Google Workspace SMTP (587 TLS)', 'badge' => 'Popular', 'badge_type' => 'popular'],
                     'outlook'  => ['name' => 'Outlook / 365', 'desc' => 'Send via Microsoft 365 / Outlook SMTP', 'badge' => 'Enterprise', 'badge_type' => 'enterprise'],
                     'resend'   => ['name' => 'Resend', 'desc' => 'Modern developer-first transactional email API', 'badge' => 'Modern API', 'badge_type' => 'developer'],
+                    'smtp2go'  => ['name' => 'SMTP2GO', 'desc' => 'High inbox delivery via direct REST API', 'badge' => 'High Inbox', 'badge_type' => 'popular'],
                     'sendgrid' => ['name' => 'SendGrid', 'desc' => 'High-volume reliable cloud API mailer', 'badge' => 'High Volume', 'badge_type' => 'popular'],
                     'postmark' => ['name' => 'Postmark', 'desc' => 'Lightning fast transactional email delivery', 'badge' => 'Fastest', 'badge_type' => 'developer'],
                     'brevo'    => ['name' => 'Brevo (Sendinblue)', 'desc' => '300 free emails/day via direct REST API', 'badge' => 'Free Tier', 'badge_type' => 'developer'],
@@ -646,8 +649,8 @@ class OI_Admin {
                 </div>
             </div>
 
-            <!-- Generic API Key Section (SendGrid, Brevo, Postmark, Resend) -->
-            <div id="oi-api-fields" class="oi-conditional-section" style="<?php echo in_array($settings['mailer'], ['sendgrid', 'brevo', 'postmark', 'resend'], true) ? '' : 'display:none;'; ?>">
+            <!-- Generic API Key Section (SendGrid, Brevo, Postmark, Resend, SMTP2GO) -->
+            <div id="oi-api-fields" class="oi-conditional-section" style="<?php echo in_array($settings['mailer'], ['sendgrid', 'brevo', 'postmark', 'resend', 'smtp2go'], true) ? '' : 'display:none;'; ?>">
                 <div class="oi-helper-card">
                     <div class="oi-helper-icon"><span class="dashicons dashicons-admin-network"></span></div>
                     <div class="oi-helper-body">
@@ -656,19 +659,34 @@ class OI_Admin {
                     </div>
                 </div>
 
-                <div class="oi-form-group">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <label class="oi-label" for="oi_api_key"><?php esc_html_e('API Key / Server Token', 'mail-smtp-by-oi'); ?> <span class="oi-required">*</span></label>
-                        <?php if (!empty($settings['api_key'])) : ?>
-                            <span class="oi-key-badge-saved"><span class="dashicons dashicons-yes-alt"></span> <?php esc_html_e('Saved & Encrypted', 'mail-smtp-by-oi'); ?></span>
-                        <?php endif; ?>
+                <?php
+                $api_mailers_meta = [
+                    'sendgrid' => ['name' => 'SendGrid', 'key' => 'sendgrid_api_key', 'label' => __('SendGrid API Key', 'mail-smtp-by-oi'), 'help' => 'https://app.sendgrid.com/settings/api_keys'],
+                    'brevo'    => ['name' => 'Brevo (Sendinblue)', 'key' => 'brevo_api_key', 'label' => __('Brevo API Key (v3)', 'mail-smtp-by-oi'), 'help' => 'https://app.brevo.com/settings/keys/api'],
+                    'postmark' => ['name' => 'Postmark', 'key' => 'postmark_api_key', 'label' => __('Postmark Server API Token', 'mail-smtp-by-oi'), 'help' => 'https://account.postmarkapp.com/servers'],
+                    'resend'   => ['name' => 'Resend', 'key' => 'resend_api_key', 'label' => __('Resend API Key', 'mail-smtp-by-oi'), 'help' => 'https://resend.com/api-keys'],
+                    'smtp2go'  => ['name' => 'SMTP2GO', 'key' => 'smtp2go_api_key', 'label' => __('SMTP2GO API Key', 'mail-smtp-by-oi'), 'help' => 'https://app.smtp2go.com/settings/users/'],
+                ];
+
+                foreach ($api_mailers_meta as $m_id => $m_meta) :
+                    $saved_val = !empty($settings[$m_meta['key']]) ? $settings[$m_meta['key']] : (($settings['mailer'] === $m_id && !empty($settings['api_key'])) ? $settings['api_key'] : '');
+                ?>
+                    <div class="oi-api-provider-field" data-api-provider="<?php echo esc_attr($m_id); ?>" style="<?php echo ($settings['mailer'] === $m_id) ? '' : 'display:none;'; ?>">
+                        <div class="oi-form-group">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <label class="oi-label" for="oi_<?php echo esc_attr($m_meta['key']); ?>"><?php echo esc_html($m_meta['label']); ?> <span class="oi-required">*</span></label>
+                                <?php if (!empty($saved_val)) : ?>
+                                    <span class="oi-key-badge-saved"><span class="dashicons dashicons-yes-alt"></span> <?php esc_html_e('Saved & Encrypted', 'mail-smtp-by-oi'); ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="oi-password-wrapper">
+                                <input type="password" class="oi-input" name="<?php echo esc_attr($m_meta['key']); ?>" id="oi_<?php echo esc_attr($m_meta['key']); ?>" value="" placeholder="<?php echo !empty($saved_val) ? esc_attr__('•••••••• (Saved - leave blank to keep)', 'mail-smtp-by-oi') : sprintf(esc_attr__('Paste your %s here', 'mail-smtp-by-oi'), $m_meta['label']); ?>" autocomplete="new-password">
+                                <button type="button" class="oi-toggle-password-btn" aria-label="Toggle visibility"><span class="dashicons dashicons-visibility"></span></button>
+                            </div>
+                            <span class="oi-help"><?php esc_html_e('Stored with AES-256-CBC encryption. Leave blank to keep existing key.', 'mail-smtp-by-oi'); ?> <a href="<?php echo esc_url($m_meta['help']); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e('Get API Key &rarr;', 'mail-smtp-by-oi'); ?></a></span>
+                        </div>
                     </div>
-                    <div class="oi-password-wrapper">
-                        <input type="password" class="oi-input" name="api_key" id="oi_api_key" value="" placeholder="<?php echo !empty($settings['api_key']) ? esc_attr__('•••••••• (Saved - leave blank to keep)', 'mail-smtp-by-oi') : esc_attr__('Paste your API Key or Token here', 'mail-smtp-by-oi'); ?>" autocomplete="new-password">
-                        <button type="button" class="oi-toggle-password-btn" aria-label="Toggle visibility"><span class="dashicons dashicons-visibility"></span></button>
-                    </div>
-                    <span class="oi-help"><?php esc_html_e('Stored with AES-256-CBC encryption. Leave blank to keep existing key.', 'mail-smtp-by-oi'); ?></span>
-                </div>
+                <?php endforeach; ?>
             </div>
 
             <!-- Mailgun Specific Fields -->
