@@ -53,8 +53,11 @@
                 $('#oi-smtp-fields').slideUp(200);
             }
 
-            if (['sendgrid', 'brevo', 'postmark', 'resend'].indexOf(mailer) !== -1) {
+            var apiProviders = ['sendgrid', 'brevo', 'postmark', 'resend', 'smtp2go'];
+            if (apiProviders.indexOf(mailer) !== -1) {
                 $('#oi-api-fields').slideDown(200);
+                $('.oi-api-provider-field').hide();
+                $('.oi-api-provider-field[data-api-provider="' + mailer + '"]').show();
             } else {
                 $('#oi-api-fields').slideUp(200);
             }
