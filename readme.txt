@@ -1,15 +1,15 @@
 === Mail SMTP by Oi ===
 Contributors: oitechnologies
 Donate link: https://oitech.com.bd/
-Tags: smtp, email, wp mail, sendgrid, mailgun, mail logger, email log, resend
+Tags: smtp, email, wp mail, sendgrid, mailgun, smtp2go, mail logger, email log, resend
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Fix WordPress email deliverability issues with Mail SMTP by Oi. Connect Custom SMTP, Gmail, Outlook, SendGrid, Mailgun, Brevo, Postmark, and Resend.
+Fix WordPress email deliverability issues with Mail SMTP by Oi. Connect Custom SMTP, Gmail, Outlook, SendGrid, Mailgun, Brevo, Postmark, Resend, and SMTP2GO.
 
 == Description ==
 
@@ -50,6 +50,15 @@ Yes! Mail SMTP by Oi uses industry-standard OpenSSL AES-256-CBC encryption to st
 Yes, 100% compatible with WooCommerce, Elementor Forms, Contact Form 7, WPForms, Gravity Forms, Fluent Forms, and all core WordPress notifications.
 
 == Changelog ==
+
+= 1.1.0 =
+* Feature: Added SMTP2GO REST API provider integration with attachment and header support.
+* Feature: Full WP-CLI support (`wp oi-smtp status`, `test`, `logs`, `queue`).
+* Feature: WordPress Core Site Health (`WP_Site_Health`) tests for mailer configuration and queue health.
+* Feature: WordPress Core Privacy & GDPR Tools integration (Personal Data Exporter & Personal Data Eraser).
+* Enhancement: Dedicated encrypted API keys per provider to prevent cross-provider configuration collisions.
+* Security: Hardened background queue worker AJAX endpoint with cryptographic nonce verification.
+* Security: Updated comprehensive enterprise-grade SECURITY.md policy.
 
 = 1.0.0 =
 * Initial official release.
