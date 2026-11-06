@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Mail SMTP by Oi
  * Plugin URI: https://oitech.com.bd/open-source/
- * Description: High-performance, secure SMTP and transactional email plugin for WordPress. Connect Custom SMTP, Gmail, Outlook, SendGrid, Mailgun, Brevo, Postmark, and Resend with comprehensive email logging, 1-click resend, and live diagnostics.
- * Version: 1.0.0
+ * Description: High-performance, secure SMTP and transactional email plugin for WordPress. Connect Custom SMTP, Gmail, Outlook, SendGrid, Mailgun, Brevo, Postmark, Resend, and SMTP2GO with comprehensive email logging, WP-CLI, Site Health checks, GDPR compliance, 1-click resend, and live diagnostics.
+ * Version: 1.1.0
  * Author: Oi Technologies
  * Author URI: https://oitech.com.bd/
  * License: GPLv3 or later
@@ -17,7 +17,7 @@
 defined('ABSPATH') || exit;
 
 // Plugin version and constants
-define('OI_MAIL_SMTP_VERSION', '1.0.0');
+define('OI_MAIL_SMTP_VERSION', '1.1.0');
 define('OI_MAIL_SMTP_FILE', __FILE__);
 define('OI_MAIL_SMTP_PATH', plugin_dir_path(__FILE__));
 define('OI_MAIL_SMTP_URL', plugin_dir_url(__FILE__));
