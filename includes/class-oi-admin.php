@@ -1025,6 +1025,7 @@ class OI_Admin {
                         'brevo'    => 'Brevo',
                         'postmark' => 'Postmark',
                         'resend'   => 'Resend',
+                        'smtp2go'  => 'SMTP2GO',
                         'gmail'    => 'Gmail / Workspace',
                         'outlook'  => 'Microsoft 365',
                         'default'  => 'Default PHP Mail',
