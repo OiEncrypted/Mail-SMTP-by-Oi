@@ -2075,6 +2075,7 @@ class OI_Admin {
             'brevo'    => 'Brevo',
             'postmark' => 'Postmark',
             'resend'   => 'Resend',
+            'smtp2go'  => 'SMTP2GO',
             'default'  => 'Default PHP Mail',
         ];
         $mailer_label = $mailer_names[$mailer] ?? strtoupper($mailer);
