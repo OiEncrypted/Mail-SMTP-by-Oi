@@ -12,7 +12,8 @@ Only the latest active minor release receives official security patches and bug 
 
 | Version | Supported          | Status                               |
 | :------ | :----------------- | :----------------------------------- |
-| 1.0.x   | :white_check_mark: | Currently Supported (Active Release) |
+| 1.1.x   | :white_check_mark: | Current Stable Release               |
+| 1.0.x   | :white_check_mark: | Supported (Security Maintenance)     |
 | < 1.0.0 | :x:                | Unsupported / Deprecated             |
 
 ---
